@@ -31,6 +31,7 @@
     "eslint-config-next": "16.1.1",
     "shadcn": "^3.6.2",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }
