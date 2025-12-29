@@ -1,4 +1,4 @@
-import { auth } from '../app/lib/auth'
+import { auth } from '@/features/auth'
 
 const VALID_ROLES = ['admin', 'supervisor', 'asesor', 'backoffice'] as const
 
@@ -31,7 +31,7 @@ Example:
         email,
         password,
         name,
-        role,
+        role: role as 'admin',
       },
     })
 
