@@ -18,7 +18,26 @@ export const admin = ac.newRole({
   ...adminAc.statements,
 })
 
+export const supervisor = ac.newRole({
+  lead: ['read', 'update'],
+  sale: ['read', 'update'],
+})
+
 export const asesor = ac.newRole({
   lead: ['create', 'read', 'update'],
   sale: ['create', 'read'],
 })
+
+export const backoffice = ac.newRole({
+  lead: ['read', 'update'],
+  sale: ['read', 'update'],
+})
+
+export const roles = {
+  admin,
+  supervisor,
+  asesor,
+  backoffice,
+} as const
+
+export type Role = keyof typeof roles

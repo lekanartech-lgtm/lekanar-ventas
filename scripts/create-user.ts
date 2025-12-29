@@ -1,6 +1,6 @@
 import { auth } from '../app/lib/auth'
 
-const VALID_ROLES = ['admin', 'asesor'] as const
+const VALID_ROLES = ['admin', 'supervisor', 'asesor', 'backoffice'] as const
 
 async function createUser() {
   const args = process.argv.slice(2)

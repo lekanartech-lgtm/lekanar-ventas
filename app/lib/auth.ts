@@ -2,7 +2,7 @@ import { betterAuth } from 'better-auth'
 import { nextCookies } from 'better-auth/next-js'
 import { admin as adminPlugin } from 'better-auth/plugins'
 import { pool } from './db'
-import { ac, admin, asesor } from './permissions'
+import { ac, roles } from './permissions'
 
 export const auth = betterAuth({
   database: pool,
@@ -22,10 +22,7 @@ export const auth = betterAuth({
   plugins: [
     adminPlugin({
       ac,
-      roles: {
-        admin,
-        asesor,
-      },
+      roles,
       defaultRole: 'asesor',
     }),
     nextCookies(),
