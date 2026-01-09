@@ -35,15 +35,11 @@ import { signOut } from '@/features/auth/client'
 const navigation = [
   {
     title: 'General',
-    items: [
-      { title: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-    ],
+    items: [{ title: 'Dashboard', href: '/admin', icon: LayoutDashboard }],
   },
   {
     title: 'Administración',
-    items: [
-      { title: 'Usuarios', href: '/admin/users', icon: Users },
-    ],
+    items: [{ title: 'Usuarios', href: '/admin/users', icon: Users }],
   },
 ]
 
@@ -87,7 +83,10 @@ export function AppSidebar({ user }: { user: User }) {
               <SidebarMenu>
                 {group.items.map((item) => (
                   <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton asChild isActive={pathname === item.href}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === item.href}
+                    >
                       <Link href={item.href}>
                         <item.icon className="h-4 w-4" />
                         <span>{item.title}</span>

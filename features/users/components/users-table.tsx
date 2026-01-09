@@ -42,7 +42,10 @@ export function UsersTable({ users }: { users: User[] }) {
           <TableBody>
             {users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                <TableCell
+                  colSpan={5}
+                  className="h-24 text-center text-muted-foreground"
+                >
                   No hay usuarios registrados
                 </TableCell>
               </TableRow>
@@ -62,7 +65,9 @@ export function UsersTable({ users }: { users: User[] }) {
                         </Avatar>
                         <div>
                           <div className="font-medium">{user.name}</div>
-                          <div className="text-sm text-muted-foreground">{user.email}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {user.email}
+                          </div>
                         </div>
                       </div>
                     </TableCell>
@@ -73,7 +78,10 @@ export function UsersTable({ users }: { users: User[] }) {
                       {user.banned ? (
                         <Badge variant="destructive">Suspendido</Badge>
                       ) : (
-                        <Badge variant="outline" className="border-green-500 text-green-600">
+                        <Badge
+                          variant="outline"
+                          className="border-green-500 text-green-600"
+                        >
                           Activo
                         </Badge>
                       )}

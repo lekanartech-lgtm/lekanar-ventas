@@ -35,7 +35,10 @@ export default async function AdminPage() {
     },
     {
       title: 'Tasa de Actividad',
-      value: totalUsers > 0 ? `${Math.round((activeUsers / totalUsers) * 100)}%` : '0%',
+      value:
+        totalUsers > 0
+          ? `${Math.round((activeUsers / totalUsers) * 100)}%`
+          : '0%',
       icon: TrendingUp,
       description: 'Usuarios activos vs total',
     },
@@ -45,9 +48,7 @@ export default async function AdminPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Resumen general del sistema
-        </p>
+        <p className="text-muted-foreground">Resumen general del sistema</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -61,7 +62,9 @@ export default async function AdminPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-muted-foreground">{stat.description}</p>
+              <p className="text-xs text-muted-foreground">
+                {stat.description}
+              </p>
             </CardContent>
           </Card>
         ))}

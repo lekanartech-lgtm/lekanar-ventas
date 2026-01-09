@@ -92,7 +92,8 @@ export function CreateUserDialog() {
         <DialogHeader>
           <DialogTitle>Crear usuario</DialogTitle>
           <DialogDescription>
-            Ingresa los datos del nuevo usuario. Recibirá acceso al sistema según el rol asignado.
+            Ingresa los datos del nuevo usuario. Recibirá acceso al sistema
+            según el rol asignado.
           </DialogDescription>
         </DialogHeader>
 
@@ -144,7 +145,9 @@ export function CreateUserDialog() {
                   <SelectItem key={r.value} value={r.value}>
                     <div className="flex flex-col">
                       <span>{r.label}</span>
-                      <span className="text-xs text-muted-foreground">{r.description}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {r.description}
+                      </span>
                     </div>
                   </SelectItem>
                 ))}
@@ -159,7 +162,11 @@ export function CreateUserDialog() {
           )}
 
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
               Cancelar
             </Button>
             <Button type="submit" disabled={loading}>
