@@ -5,6 +5,7 @@ import { pool } from '@/lib/db'
 import { ac, roles } from './permissions'
 
 export const auth = betterAuth({
+  trustedOrigins: ['http://localhost:3000', 'http://192.168.0.45:3000'],
   database: pool,
 
   emailAndPassword: {

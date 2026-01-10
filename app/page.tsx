@@ -17,7 +17,10 @@ export default async function Home() {
   })
 
   if (session) {
-    redirect('/admin')
+    if (session.user.role === 'admin') {
+      redirect('/admin')
+    }
+    redirect('/dashboard')
   }
 
   return (
@@ -25,11 +28,11 @@ export default async function Home() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
-            ISP
+            WIN
           </div>
-          <CardTitle className="text-2xl">Gestión ISP</CardTitle>
+          <CardTitle className="text-2xl">WIN Sales</CardTitle>
           <CardDescription>
-            Plataforma de gestión de leads y ventas
+            Sistema de gestión comercial
           </CardDescription>
         </CardHeader>
         <CardContent>

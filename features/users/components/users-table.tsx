@@ -1,5 +1,18 @@
 'use client'
 
+import { useState } from 'react'
+import {
+  ColumnDef,
+  ColumnFiltersState,
+  SortingState,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from '@tanstack/react-table'
+import { ArrowUpDown, Search } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -9,7 +22,9 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { UserActions } from './user-actions'
 import { ROLE_CONFIG } from '../constants'
@@ -25,83 +40,204 @@ function getInitials(name: string): string {
     .slice(0, 2)
 }
 
+const columns: ColumnDef<User>[] = [
+  {
+    accessorKey: 'name',
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        className="-ml-4"
+        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+      >
+        Usuario
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      const user = row.original
+      return (
+        <div className="flex items-center gap-3">
+          <Avatar className="h-9 w-9">
+            <AvatarFallback className="bg-primary/10 text-primary text-xs">
+              {getInitials(user.name)}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <div className="font-medium">{user.name}</div>
+            <div className="text-sm text-muted-foreground">{user.email}</div>
+          </div>
+        </div>
+      )
+    },
+  },
+  {
+    accessorKey: 'role',
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        className="-ml-4"
+        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+      >
+        Rol
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      const role = (row.getValue('role') as Role) || 'asesor'
+      const config = ROLE_CONFIG[role]
+      return <Badge variant={config.variant}>{config.label}</Badge>
+    },
+  },
+  {
+    accessorKey: 'banned',
+    header: 'Estado',
+    cell: ({ row }) => {
+      const banned = row.getValue('banned') as boolean
+      return banned ? (
+        <Badge variant="destructive">Suspendido</Badge>
+      ) : (
+        <Badge variant="outline" className="border-green-500 text-green-600">
+          Activo
+        </Badge>
+      )
+    },
+  },
+  {
+    accessorKey: 'createdAt',
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        className="-ml-4"
+        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+      >
+        Fecha de registro
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      const date = row.getValue('createdAt') as Date
+      return (
+        <span className="text-muted-foreground">
+          {new Date(date).toLocaleDateString('es-ES', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          })}
+        </span>
+      )
+    },
+  },
+  {
+    id: 'actions',
+    cell: ({ row }) => <UserActions user={row.original} />,
+  },
+]
+
 export function UsersTable({ users }: { users: User[] }) {
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+
+  const table = useReactTable({
+    data: users,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    state: {
+      sorting,
+      columnFilters,
+    },
+  })
+
   return (
     <Card>
+      <CardHeader className="pb-4">
+        <div className="relative w-full max-w-sm">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por nombre..."
+            value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
+            onChange={(e) =>
+              table.getColumn('name')?.setFilterValue(e.target.value)
+            }
+            className="pl-9"
+          />
+        </div>
+      </CardHeader>
       <CardContent className="p-0">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead className="w-[300px]">Usuario</TableHead>
-              <TableHead>Rol</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Fecha de registro</TableHead>
-              <TableHead className="w-[50px]"></TableHead>
-            </TableRow>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
           </TableHeader>
           <TableBody>
-            {users.length === 0 ? (
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
               <TableRow>
                 <TableCell
-                  colSpan={5}
+                  colSpan={columns.length}
                   className="h-24 text-center text-muted-foreground"
                 >
                   No hay usuarios registrados
                 </TableCell>
               </TableRow>
-            ) : (
-              users.map((user) => {
-                const role = (user.role as Role) || 'asesor'
-                const config = ROLE_CONFIG[role]
-
-                return (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-9 w-9">
-                          <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                            {getInitials(user.name)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="font-medium">{user.name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {user.email}
-                          </div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={config.variant}>{config.label}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      {user.banned ? (
-                        <Badge variant="destructive">Suspendido</Badge>
-                      ) : (
-                        <Badge
-                          variant="outline"
-                          className="border-green-500 text-green-600"
-                        >
-                          Activo
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {new Date(user.createdAt).toLocaleDateString('es-ES', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                    </TableCell>
-                    <TableCell>
-                      <UserActions user={user} />
-                    </TableCell>
-                  </TableRow>
-                )
-              })
             )}
           </TableBody>
         </Table>
+
+        {table.getPageCount() > 1 && (
+          <div className="flex items-center justify-between border-t px-4 py-3">
+            <p className="text-sm text-muted-foreground">
+              Página {table.getState().pagination.pageIndex + 1} de{' '}
+              {table.getPageCount()}
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              >
+                Anterior
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+              >
+                Siguiente
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   )
