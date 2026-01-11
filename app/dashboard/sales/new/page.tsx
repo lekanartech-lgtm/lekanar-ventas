@@ -5,6 +5,7 @@ import { ArrowLeft } from 'lucide-react'
 import { auth } from '@/features/auth/server'
 import { getLeadById } from '@/features/leads'
 import { getPlans, SaleForm } from '@/features/sales'
+import { getOperators } from '@/features/operators'
 import { Button } from '@/components/ui/button'
 
 export default async function NewSalePage({
@@ -21,9 +22,10 @@ export default async function NewSalePage({
     redirect('/dashboard/leads')
   }
 
-  const [lead, plans] = await Promise.all([
+  const [lead, plans, operators] = await Promise.all([
     getLeadById(leadId, session!.user.id),
     getPlans(),
+    getOperators(),
   ])
 
   if (!lead) {
@@ -50,7 +52,7 @@ export default async function NewSalePage({
         </div>
       </div>
 
-      <SaleForm lead={lead} plans={plans} />
+      <SaleForm lead={lead} plans={plans} operators={operators} />
     </div>
   )
 }

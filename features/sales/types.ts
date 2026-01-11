@@ -43,6 +43,9 @@ export type Sale = {
   validatedBy: string | null
   validatedAt: Date | null
 
+  operatorId: string | null
+  operatorName?: string
+
   createdAt: Date
   updatedAt: Date
 }
@@ -76,6 +79,8 @@ export type SaleFormData = {
 
   score: string
   installationDate: string
+
+  operatorId: string
 }
 
 export type Plan = {
@@ -85,4 +90,6 @@ export type Plan = {
   price: number
   commission: number
   isActive: boolean
+  operatorId: string | null
+  operatorName?: string
 }

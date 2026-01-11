@@ -37,7 +37,7 @@ export default async function DashboardLayout({
 
       <main className="container max-w-lg mx-auto p-4">{children}</main>
 
-      <BottomNav />
+      <BottomNav role={session.user.role} />
     </div>
   )
 }

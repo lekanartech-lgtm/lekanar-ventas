@@ -81,8 +81,16 @@ const columns: ColumnDef<Lead>[] = [
     },
   },
   {
-    accessorKey: 'currentOperator',
+    accessorKey: 'operatorName',
     header: 'Operador',
+    cell: ({ row }) => {
+      const operatorName = row.getValue('operatorName') as string | undefined
+      return operatorName || '-'
+    },
+  },
+  {
+    accessorKey: 'currentOperator',
+    header: 'ISP Actual',
     cell: ({ row }) => getOperatorLabel(row.getValue('currentOperator')),
   },
   {
@@ -299,6 +307,9 @@ export function LeadsCardList({ leads }: { leads: Lead[] }) {
                 </a>
               </div>
               <div className="flex flex-col items-end gap-2">
+                {lead.operatorName && (
+                  <span className="text-xs font-medium text-primary">{lead.operatorName}</span>
+                )}
                 <LeadStatusBadge status={lead.status} />
                 <span className="text-xs text-muted-foreground">
                   {new Date(lead.createdAt).toLocaleDateString('es-PE', {

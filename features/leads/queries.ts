@@ -14,6 +14,8 @@ type LeadRow = {
   notes: string | null
   status: 'new' | 'converted'
   user_id: string
+  operator_id: string | null
+  operator_name: string | null
   created_at: Date
   updated_at: Date
 }
@@ -32,6 +34,8 @@ function mapRowToLead(row: LeadRow): Lead {
     notes: row.notes,
     status: row.status,
     userId: row.user_id,
+    operatorId: row.operator_id,
+    operatorName: row.operator_name ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   }
@@ -41,9 +45,11 @@ export async function getLeadsByUserId(userId: string): Promise<Lead[]> {
   const result = await pool.query<LeadRow>(
     `SELECT
       l.*,
-      rs.name as referral_source_name
+      rs.name as referral_source_name,
+      o.name as operator_name
     FROM leads l
     LEFT JOIN referral_sources rs ON l.referral_source_id = rs.id
+    LEFT JOIN operators o ON l.operator_id = o.id
     WHERE l.user_id = $1
     ORDER BY l.created_at DESC`,
     [userId]
@@ -55,13 +61,32 @@ export async function getLeadById(id: string, userId: string): Promise<Lead | nu
   const result = await pool.query<LeadRow>(
     `SELECT
       l.*,
-      rs.name as referral_source_name
+      rs.name as referral_source_name,
+      o.name as operator_name
     FROM leads l
     LEFT JOIN referral_sources rs ON l.referral_source_id = rs.id
+    LEFT JOIN operators o ON l.operator_id = o.id
     WHERE l.id = $1 AND l.user_id = $2`,
     [id, userId]
   )
   return result.rows[0] ? mapRowToLead(result.rows[0]) : null
+}
+
+export async function getLeadsBySupervisor(supervisorId: string): Promise<Lead[]> {
+  const result = await pool.query<LeadRow>(
+    `SELECT
+      l.*,
+      rs.name as referral_source_name,
+      o.name as operator_name
+    FROM leads l
+    LEFT JOIN referral_sources rs ON l.referral_source_id = rs.id
+    LEFT JOIN operators o ON l.operator_id = o.id
+    JOIN supervisor_advisors sa ON l.user_id = sa.advisor_id
+    WHERE sa.supervisor_id = $1
+    ORDER BY l.created_at DESC`,
+    [supervisorId]
+  )
+  return result.rows.map(mapRowToLead)
 }
 
 export async function getReferralSources(): Promise<ReferralSource[]> {

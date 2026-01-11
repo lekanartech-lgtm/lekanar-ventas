@@ -18,13 +18,15 @@ import { Loader2 } from 'lucide-react'
 import { createLead, updateLead } from '../actions'
 import { TIME_PREFERENCES, OPERATORS } from '../constants'
 import type { Lead, LeadFormData, ReferralSource } from '../types'
+import type { Operator } from '@/features/operators'
 
 type LeadFormProps = {
   lead?: Lead
   referralSources: ReferralSource[]
+  operators: Operator[]
 }
 
-export function LeadForm({ lead, referralSources }: LeadFormProps) {
+export function LeadForm({ lead, referralSources, operators }: LeadFormProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
@@ -45,6 +47,7 @@ export function LeadForm({ lead, referralSources }: LeadFormProps) {
       referralSourceId: formData.get('referralSourceId') as string,
       currentOperator: formData.get('currentOperator') as string,
       notes: formData.get('notes') as string,
+      operatorId: formData.get('operatorId') as string,
     }
 
     startTransition(async () => {
@@ -66,6 +69,26 @@ export function LeadForm({ lead, referralSources }: LeadFormProps) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <Card>
         <CardContent className="pt-6 space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="operatorId">Operador *</Label>
+            <Select
+              name="operatorId"
+              defaultValue={lead?.operatorId || ''}
+              required
+            >
+              <SelectTrigger id="operatorId">
+                <SelectValue placeholder="Seleccionar operador" />
+              </SelectTrigger>
+              <SelectContent>
+                {operators.map((op) => (
+                  <SelectItem key={op.id} value={op.id}>
+                    {op.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="fullName">Nombre completo *</Label>
             <Input

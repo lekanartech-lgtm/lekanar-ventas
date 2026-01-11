@@ -13,6 +13,8 @@ export type Lead = {
   notes: string | null
   status: LeadStatus
   userId: string
+  operatorId: string | null
+  operatorName?: string
   createdAt: Date
   updatedAt: Date
 }
@@ -26,6 +28,7 @@ export type LeadFormData = {
   referralSourceId: string
   currentOperator: string
   notes: string
+  operatorId: string
 }
 
 export type ReferralSource = {

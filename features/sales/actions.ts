@@ -19,10 +19,10 @@ export async function createSale(data: SaleFormData) {
         lead_id, full_name, dni, dni_expiry_date, birth_place, birth_date,
         email, phone, phone_owner_name, phone_owner_dni,
         address, address_type, reference, district, province, department,
-        latitude, longitude, plan_id, price, score, installation_date, user_id
+        latitude, longitude, plan_id, price, score, installation_date, user_id, operator_id
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-        $17, $18, $19, $20, $21, $22, $23
+        $17, $18, $19, $20, $21, $22, $23, $24
       )
       RETURNING id`,
       [
@@ -49,6 +49,7 @@ export async function createSale(data: SaleFormData) {
         data.score ? parseInt(data.score) : null,
         data.installationDate || null,
         session.user.id,
+        data.operatorId || null,
       ]
     )
 
@@ -112,6 +113,7 @@ export async function updateSale(id: string, data: Partial<SaleFormData>) {
       planId: 'plan_id',
       score: 'score',
       installationDate: 'installation_date',
+      operatorId: 'operator_id',
     }
 
     for (const [key, dbField] of Object.entries(fieldMap)) {

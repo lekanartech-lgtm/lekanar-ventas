@@ -34,6 +34,8 @@ type SaleRow = {
   user_id: string
   validated_by: string | null
   validated_at: Date | null
+  operator_id: string | null
+  operator_name: string | null
   created_at: Date
   updated_at: Date
 }
@@ -72,6 +74,8 @@ function mapRowToSale(row: SaleRow): Sale {
     userId: row.user_id,
     validatedBy: row.validated_by,
     validatedAt: row.validated_at,
+    operatorId: row.operator_id,
+    operatorName: row.operator_name ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   }
@@ -81,9 +85,11 @@ export async function getSalesByUserId(userId: string): Promise<Sale[]> {
   const result = await pool.query<SaleRow>(
     `SELECT
       s.*,
-      p.name as plan_name
+      p.name as plan_name,
+      o.name as operator_name
     FROM sales s
     JOIN plans p ON s.plan_id = p.id
+    LEFT JOIN operators o ON s.operator_id = o.id
     WHERE s.user_id = $1
     ORDER BY s.created_at DESC`,
     [userId]
@@ -95,13 +101,32 @@ export async function getSaleById(id: string, userId: string): Promise<Sale | nu
   const result = await pool.query<SaleRow>(
     `SELECT
       s.*,
-      p.name as plan_name
+      p.name as plan_name,
+      o.name as operator_name
     FROM sales s
     JOIN plans p ON s.plan_id = p.id
+    LEFT JOIN operators o ON s.operator_id = o.id
     WHERE s.id = $1 AND s.user_id = $2`,
     [id, userId]
   )
   return result.rows[0] ? mapRowToSale(result.rows[0]) : null
+}
+
+export async function getSalesBySupervisor(supervisorId: string): Promise<Sale[]> {
+  const result = await pool.query<SaleRow>(
+    `SELECT
+      s.*,
+      p.name as plan_name,
+      o.name as operator_name
+    FROM sales s
+    JOIN plans p ON s.plan_id = p.id
+    LEFT JOIN operators o ON s.operator_id = o.id
+    JOIN supervisor_advisors sa ON s.user_id = sa.advisor_id
+    WHERE sa.supervisor_id = $1
+    ORDER BY s.created_at DESC`,
+    [supervisorId]
+  )
+  return result.rows.map(mapRowToSale)
 }
 
 export async function getPlans(): Promise<Plan[]> {
@@ -112,7 +137,13 @@ export async function getPlans(): Promise<Plan[]> {
     price: string
     commission: string
     is_active: boolean
-  }>(`SELECT * FROM plans WHERE is_active = true ORDER BY price`)
+    operator_id: string | null
+    operator_name: string | null
+  }>(`SELECT p.*, o.name as operator_name
+      FROM plans p
+      LEFT JOIN operators o ON p.operator_id = o.id
+      WHERE p.is_active = true
+      ORDER BY o.name, p.price`)
 
   return result.rows.map((row) => ({
     id: row.id,
@@ -121,5 +152,36 @@ export async function getPlans(): Promise<Plan[]> {
     price: parseFloat(row.price),
     commission: parseFloat(row.commission),
     isActive: row.is_active,
+    operatorId: row.operator_id,
+    operatorName: row.operator_name ?? undefined,
+  }))
+}
+
+export async function getPlansByOperator(operatorId: string): Promise<Plan[]> {
+  const result = await pool.query<{
+    id: string
+    name: string
+    speed_mbps: number
+    price: string
+    commission: string
+    is_active: boolean
+    operator_id: string | null
+    operator_name: string | null
+  }>(`SELECT p.*, o.name as operator_name
+      FROM plans p
+      LEFT JOIN operators o ON p.operator_id = o.id
+      WHERE p.is_active = true AND p.operator_id = $1
+      ORDER BY p.price`,
+    [operatorId])
+
+  return result.rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    speedMbps: row.speed_mbps,
+    price: parseFloat(row.price),
+    commission: parseFloat(row.commission),
+    isActive: row.is_active,
+    operatorId: row.operator_id,
+    operatorName: row.operator_name ?? undefined,
   }))
 }

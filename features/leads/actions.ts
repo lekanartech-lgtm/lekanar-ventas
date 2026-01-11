@@ -17,8 +17,8 @@ export async function createLead(data: LeadFormData) {
     const result = await pool.query(
       `INSERT INTO leads (
         full_name, dni, phone, contact_date, contact_time_preference,
-        referral_source_id, current_operator, notes, user_id
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        referral_source_id, current_operator, notes, user_id, operator_id
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING id`,
       [
         data.fullName,
@@ -30,6 +30,7 @@ export async function createLead(data: LeadFormData) {
         data.currentOperator || null,
         data.notes || null,
         session.user.id,
+        data.operatorId || null,
       ]
     )
 
@@ -97,6 +98,10 @@ export async function updateLead(id: string, data: Partial<LeadFormData>) {
     if (data.notes !== undefined) {
       fields.push(`notes = $${paramIndex++}`)
       values.push(data.notes || null)
+    }
+    if (data.operatorId !== undefined) {
+      fields.push(`operator_id = $${paramIndex++}`)
+      values.push(data.operatorId || null)
     }
 
     if (fields.length === 0) {

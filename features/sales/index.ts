@@ -5,7 +5,7 @@ export {
   ADDRESS_TYPE_CONFIG,
   DEPARTMENTS,
 } from './constants'
-export { getSalesByUserId, getSaleById, getPlans } from './queries'
+export { getSalesByUserId, getSaleById, getSalesBySupervisor, getPlans, getPlansByOperator } from './queries'
 export { createSale, updateSale } from './actions'
 export { SaleForm } from './components/sale-form'
 export { SalesTable, SalesCardList } from './components/sales-table'

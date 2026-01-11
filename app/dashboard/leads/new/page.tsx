@@ -1,10 +1,14 @@
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { getReferralSources, LeadForm } from '@/features/leads'
+import { getOperators } from '@/features/operators'
 import { Button } from '@/components/ui/button'
 
 export default async function NewLeadPage() {
-  const referralSources = await getReferralSources()
+  const [referralSources, operators] = await Promise.all([
+    getReferralSources(),
+    getOperators(),
+  ])
 
   return (
     <div className="space-y-4">
@@ -22,7 +26,7 @@ export default async function NewLeadPage() {
         </div>
       </div>
 
-      <LeadForm referralSources={referralSources} />
+      <LeadForm referralSources={referralSources} operators={operators} />
     </div>
   )
 }

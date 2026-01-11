@@ -60,6 +60,14 @@ const columns: ColumnDef<Sale>[] = [
     },
   },
   {
+    accessorKey: 'operatorName',
+    header: 'Operador',
+    cell: ({ row }) => {
+      const operatorName = row.getValue('operatorName') as string | undefined
+      return operatorName || '-'
+    },
+  },
+  {
     accessorKey: 'planName',
     header: 'Plan',
     cell: ({ row }) => (
@@ -288,6 +296,9 @@ export function SalesCardList({ sales }: { sales: Sale[] }) {
                   </p>
                 </div>
                 <div className="flex flex-col items-end gap-1">
+                  {sale.operatorName && (
+                    <span className="text-xs font-medium text-primary">{sale.operatorName}</span>
+                  )}
                   <RequestStatusBadge status={sale.requestStatus} />
                   <span className="text-xs text-muted-foreground">
                     {new Date(sale.createdAt).toLocaleDateString('es-PE', {

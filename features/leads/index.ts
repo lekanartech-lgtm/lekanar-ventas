@@ -1,6 +1,6 @@
 export type { Lead, LeadStatus, LeadFormData, ReferralSource } from './types'
 export { LEAD_STATUS_CONFIG, TIME_PREFERENCES, OPERATORS } from './constants'
-export { getLeadsByUserId, getLeadById, getReferralSources } from './queries'
+export { getLeadsByUserId, getLeadById, getLeadsBySupervisor, getReferralSources } from './queries'
 export { createLead, updateLead, deleteLead } from './actions'
 export { LeadForm } from './components/lead-form'
 export { LeadsTable, LeadsCardList } from './components/leads-table'

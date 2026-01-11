@@ -20,28 +20,43 @@ import { createSale, updateSale } from '../actions'
 import { ADDRESS_TYPE_CONFIG, DEPARTMENTS } from '../constants'
 import type { Sale, SaleFormData, Plan, AddressType } from '../types'
 import type { Lead } from '@/features/leads'
+import type { Operator } from '@/features/operators'
 
 type SaleFormProps = {
   sale?: Sale
   lead?: Lead
   plans: Plan[]
+  operators: Operator[]
 }
 
-export function SaleForm({ sale, lead, plans }: SaleFormProps) {
+export function SaleForm({ sale, lead, plans, operators }: SaleFormProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
   const [isPhoneOwner, setIsPhoneOwner] = useState(
     sale ? !sale.phoneOwnerName : true
   )
+  const [selectedOperatorId, setSelectedOperatorId] = useState(
+    sale?.operatorId || lead?.operatorId || ''
+  )
   const [selectedPlanId, setSelectedPlanId] = useState(sale?.planId || '')
   const [price, setPrice] = useState(sale?.price?.toString() || '')
+
+  const filteredPlans = selectedOperatorId
+    ? plans.filter((p) => p.operatorId === selectedOperatorId)
+    : []
+
+  function handleOperatorChange(operatorId: string) {
+    setSelectedOperatorId(operatorId)
+    setSelectedPlanId('')
+    setPrice('')
+  }
 
   const isEditing = !!sale
 
   function handlePlanChange(planId: string) {
     setSelectedPlanId(planId)
-    const plan = plans.find((p) => p.id === planId)
+    const plan = filteredPlans.find((p) => p.id === planId)
     if (plan) {
       setPrice(plan.price.toString())
     }
@@ -97,6 +112,7 @@ export function SaleForm({ sale, lead, plans }: SaleFormProps) {
       price: formData.get('price') as string,
       score: formData.get('score') as string,
       installationDate: formData.get('installationDate') as string,
+      operatorId: formData.get('operatorId') as string,
     }
 
     startTransition(async () => {
@@ -116,6 +132,35 @@ export function SaleForm({ sale, lead, plans }: SaleFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Operador */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Operador</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Label htmlFor="operatorId">Operador *</Label>
+            <Select
+              name="operatorId"
+              value={selectedOperatorId}
+              onValueChange={handleOperatorChange}
+              required
+            >
+              <SelectTrigger id="operatorId">
+                <SelectValue placeholder="Seleccionar operador" />
+              </SelectTrigger>
+              <SelectContent>
+                {operators.map((op) => (
+                  <SelectItem key={op.id} value={op.id}>
+                    {op.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Datos personales */}
       <Card>
         <CardHeader className="pb-3">
@@ -383,12 +428,13 @@ export function SaleForm({ sale, lead, plans }: SaleFormProps) {
               name="planId"
               value={selectedPlanId}
               onValueChange={handlePlanChange}
+              disabled={!selectedOperatorId}
             >
               <SelectTrigger id="planId">
-                <SelectValue placeholder="Seleccionar plan" />
+                <SelectValue placeholder={selectedOperatorId ? "Seleccionar plan" : "Selecciona un operador primero"} />
               </SelectTrigger>
               <SelectContent>
-                {plans.map((plan) => (
+                {filteredPlans.map((plan) => (
                   <SelectItem key={plan.id} value={plan.id}>
                     {plan.name} - S/.{plan.price.toFixed(2)}
                   </SelectItem>
