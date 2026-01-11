@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { ArrowUpDown, Search, Phone, MoreHorizontal, Pencil, Trash2, ShoppingCart } from 'lucide-react'
+import { ArrowUpDown, Search, MoreHorizontal, Eye, MapPin } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -31,17 +31,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { LeadStatusBadge } from './lead-status-badge'
-import { OPERATORS } from '../constants'
-import type { Lead } from '../types'
+import { RequestStatusBadge, OrderStatusBadge } from './sale-status-badge'
+import type { Sale } from '../types'
 
-function getOperatorLabel(value: string | null): string {
-  if (!value) return '-'
-  const op = OPERATORS.find((o) => o.value === value)
-  return op?.label || value
-}
-
-const columns: ColumnDef<Lead>[] = [
+const columns: ColumnDef<Sale>[] = [
   {
     accessorKey: 'fullName',
     header: ({ column }) => (
@@ -55,40 +48,38 @@ const columns: ColumnDef<Lead>[] = [
       </Button>
     ),
     cell: ({ row }) => {
-      const lead = row.original
+      const sale = row.original
       return (
         <div>
-          <div className="font-medium">{lead.fullName}</div>
-          <div className="text-sm text-muted-foreground">DNI: {lead.dni}</div>
+          <div className="font-medium">{sale.fullName}</div>
+          <div className="text-sm text-muted-foreground">
+            {sale.district}, {sale.province}
+          </div>
         </div>
       )
     },
   },
   {
-    accessorKey: 'phone',
-    header: 'Teléfono',
-    cell: ({ row }) => {
-      const phone = row.getValue('phone') as string
-      return (
-        <a
-          href={`tel:${phone}`}
-          className="flex items-center gap-1 text-primary hover:underline"
-        >
-          <Phone className="h-3 w-3" />
-          {phone}
-        </a>
-      )
-    },
+    accessorKey: 'planName',
+    header: 'Plan',
+    cell: ({ row }) => (
+      <div>
+        <div className="font-medium">{row.original.planName}</div>
+        <div className="text-sm text-muted-foreground">
+          S/.{row.original.price.toFixed(2)}
+        </div>
+      </div>
+    ),
   },
   {
-    accessorKey: 'currentOperator',
-    header: 'Operador',
-    cell: ({ row }) => getOperatorLabel(row.getValue('currentOperator')),
+    accessorKey: 'requestStatus',
+    header: 'Pedido',
+    cell: ({ row }) => <RequestStatusBadge status={row.getValue('requestStatus')} />,
   },
   {
-    accessorKey: 'status',
-    header: 'Estado',
-    cell: ({ row }) => <LeadStatusBadge status={row.getValue('status')} />,
+    accessorKey: 'orderStatus',
+    header: 'Orden',
+    cell: ({ row }) => <OrderStatusBadge status={row.getValue('orderStatus')} />,
   },
   {
     accessorKey: 'createdAt',
@@ -117,7 +108,7 @@ const columns: ColumnDef<Lead>[] = [
   {
     id: 'actions',
     cell: ({ row }) => {
-      const lead = row.original
+      const sale = row.original
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -126,24 +117,24 @@ const columns: ColumnDef<Lead>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {lead.status === 'new' && (
-              <DropdownMenuItem asChild>
-                <Link href={`/dashboard/sales/new?leadId=${lead.id}`}>
-                  <ShoppingCart className="mr-2 h-4 w-4" />
-                  Convertir a venta
-                </Link>
-              </DropdownMenuItem>
-            )}
             <DropdownMenuItem asChild>
-              <Link href={`/dashboard/leads/${lead.id}/edit`}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Editar
+              <Link href={`/dashboard/sales/${sale.id}`}>
+                <Eye className="mr-2 h-4 w-4" />
+                Ver detalles
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">
-              <Trash2 className="mr-2 h-4 w-4" />
-              Eliminar
-            </DropdownMenuItem>
+            {sale.latitude && sale.longitude && (
+              <DropdownMenuItem asChild>
+                <a
+                  href={`https://maps.google.com/?q=${sale.latitude},${sale.longitude}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <MapPin className="mr-2 h-4 w-4" />
+                  Ver en mapa
+                </a>
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       )
@@ -151,7 +142,7 @@ const columns: ColumnDef<Lead>[] = [
   },
 ]
 
-export function LeadsTable({ leads }: { leads: Lead[] }) {
+export function SalesTable({ sales }: { sales: Sale[] }) {
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'createdAt', desc: true },
   ])
@@ -159,7 +150,7 @@ export function LeadsTable({ leads }: { leads: Lead[] }) {
   const [globalFilter, setGlobalFilter] = useState('')
 
   const table = useReactTable({
-    data: leads,
+    data: sales,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -185,7 +176,7 @@ export function LeadsTable({ leads }: { leads: Lead[] }) {
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Buscar por nombre o DNI..."
+            placeholder="Buscar por nombre..."
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.target.value)}
             className="pl-9"
@@ -231,7 +222,7 @@ export function LeadsTable({ leads }: { leads: Lead[] }) {
                     colSpan={columns.length}
                     className="h-24 text-center text-muted-foreground"
                   >
-                    No hay leads registrados
+                    No hay ventas registradas
                   </TableCell>
                 </TableRow>
               )}
@@ -242,7 +233,7 @@ export function LeadsTable({ leads }: { leads: Lead[] }) {
         {table.getPageCount() > 1 && (
           <div className="flex items-center justify-between border-t px-4 py-3">
             <p className="text-sm text-muted-foreground">
-              {table.getFilteredRowModel().rows.length} leads
+              {table.getFilteredRowModel().rows.length} ventas
             </p>
             <div className="flex gap-2">
               <Button
@@ -269,13 +260,12 @@ export function LeadsTable({ leads }: { leads: Lead[] }) {
   )
 }
 
-// Mobile-friendly card list for small screens
-export function LeadsCardList({ leads }: { leads: Lead[] }) {
-  if (leads.length === 0) {
+export function SalesCardList({ sales }: { sales: Sale[] }) {
+  if (sales.length === 0) {
     return (
       <Card>
         <CardContent className="py-8 text-center text-muted-foreground">
-          No hay leads registrados
+          No hay ventas registradas
         </CardContent>
       </Card>
     )
@@ -283,54 +273,33 @@ export function LeadsCardList({ leads }: { leads: Lead[] }) {
 
   return (
     <div className="space-y-3">
-      {leads.map((lead) => (
-        <Card key={lead.id}>
-          <CardContent className="p-4">
-            <div className="flex items-start justify-between">
-              <div className="space-y-1">
-                <p className="font-medium">{lead.fullName}</p>
-                <p className="text-sm text-muted-foreground">DNI: {lead.dni}</p>
-                <a
-                  href={`tel:${lead.phone}`}
-                  className="flex items-center gap-1 text-sm text-primary"
-                >
-                  <Phone className="h-3 w-3" />
-                  {lead.phone}
-                </a>
+      {sales.map((sale) => (
+        <Link key={sale.id} href={`/dashboard/sales/${sale.id}`}>
+          <Card className="hover:bg-muted/50 transition-colors">
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <p className="font-medium">{sale.fullName}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {sale.planName} - S/.{sale.price.toFixed(2)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {sale.district}, {sale.province}
+                  </p>
+                </div>
+                <div className="flex flex-col items-end gap-1">
+                  <RequestStatusBadge status={sale.requestStatus} />
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(sale.createdAt).toLocaleDateString('es-PE', {
+                      day: '2-digit',
+                      month: 'short',
+                    })}
+                  </span>
+                </div>
               </div>
-              <div className="flex flex-col items-end gap-2">
-                <LeadStatusBadge status={lead.status} />
-                <span className="text-xs text-muted-foreground">
-                  {new Date(lead.createdAt).toLocaleDateString('es-PE', {
-                    day: '2-digit',
-                    month: 'short',
-                  })}
-                </span>
-              </div>
-            </div>
-            <div className="mt-3 flex gap-2">
-              {lead.status === 'new' && (
-                <Button size="sm" className="flex-1" asChild>
-                  <Link href={`/dashboard/sales/new?leadId=${lead.id}`}>
-                    <ShoppingCart className="mr-2 h-3 w-3" />
-                    Vender
-                  </Link>
-                </Button>
-              )}
-              <Button variant="outline" size="sm" className={lead.status === 'new' ? '' : 'flex-1'} asChild>
-                <Link href={`/dashboard/leads/${lead.id}/edit`}>
-                  <Pencil className="mr-2 h-3 w-3" />
-                  Editar
-                </Link>
-              </Button>
-              <Button variant="outline" size="sm" asChild>
-                <a href={`tel:${lead.phone}`}>
-                  <Phone className="h-3 w-3" />
-                </a>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </Link>
       ))}
     </div>
   )
