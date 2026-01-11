@@ -156,3 +156,75 @@ export async function updateSale(id: string, data: Partial<SaleFormData>) {
     return { error: 'Error al actualizar la venta' }
   }
 }
+
+export type BackofficeUpdateData = {
+  score?: number | null
+  winforceId?: string | null
+  contractNumber?: string | null
+  requestStatus?: string
+  orderStatus?: string
+  rejectionReason?: string | null
+  installationDate?: string | null
+}
+
+export async function backofficeUpdateSale(id: string, data: BackofficeUpdateData) {
+  const session = await auth.api.getSession({ headers: await headers() })
+
+  if (!session || !['backoffice', 'admin'].includes(session.user.role || '')) {
+    return { error: 'No autorizado' }
+  }
+
+  try {
+    const fields: string[] = []
+    const values: (string | number | null)[] = []
+    let paramIndex = 1
+
+    if (data.score !== undefined) {
+      fields.push(`score = $${paramIndex++}`)
+      values.push(data.score)
+    }
+    if (data.winforceId !== undefined) {
+      fields.push(`winforce_id = $${paramIndex++}`)
+      values.push(data.winforceId || null)
+    }
+    if (data.contractNumber !== undefined) {
+      fields.push(`contract_number = $${paramIndex++}`)
+      values.push(data.contractNumber || null)
+    }
+    if (data.requestStatus !== undefined) {
+      fields.push(`request_status = $${paramIndex++}`)
+      values.push(data.requestStatus)
+    }
+    if (data.orderStatus !== undefined) {
+      fields.push(`order_status = $${paramIndex++}`)
+      values.push(data.orderStatus)
+    }
+    if (data.rejectionReason !== undefined) {
+      fields.push(`rejection_reason = $${paramIndex++}`)
+      values.push(data.rejectionReason || null)
+    }
+    if (data.installationDate !== undefined) {
+      fields.push(`installation_date = $${paramIndex++}`)
+      values.push(data.installationDate || null)
+    }
+
+    if (fields.length === 0) {
+      return { error: 'No hay campos para actualizar' }
+    }
+
+    values.push(id)
+
+    await pool.query(
+      `UPDATE sales SET ${fields.join(', ')} WHERE id = $${paramIndex}`,
+      values
+    )
+
+    revalidatePath('/dashboard/backoffice')
+    revalidatePath('/dashboard/backoffice/sales')
+    revalidatePath(`/dashboard/backoffice/sales/${id}`)
+    return { success: true }
+  } catch (error) {
+    console.error('Error updating sale (backoffice):', error)
+    return { error: 'Error al actualizar la venta' }
+  }
+}

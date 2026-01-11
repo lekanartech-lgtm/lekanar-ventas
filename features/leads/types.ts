@@ -13,6 +13,7 @@ export type Lead = {
   notes: string | null
   status: LeadStatus
   userId: string
+  userName?: string
   operatorId: string | null
   operatorName?: string
   createdAt: Date

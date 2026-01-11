@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
-import { getReferralSources, LeadForm } from '@/features/leads'
+import { getReferralSources } from '@/features/leads'
+import { LeadCreationWizard } from '@/features/leads/components/lead-creation-wizard'
 import { getOperators } from '@/features/operators'
 import { Button } from '@/components/ui/button'
 
@@ -26,7 +27,7 @@ export default async function NewLeadPage() {
         </div>
       </div>
 
-      <LeadForm referralSources={referralSources} operators={operators} />
+      <LeadCreationWizard referralSources={referralSources} operators={operators} />
     </div>
   )
 }

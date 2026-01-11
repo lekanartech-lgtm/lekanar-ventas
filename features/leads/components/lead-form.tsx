@@ -24,20 +24,28 @@ type LeadFormProps = {
   lead?: Lead
   referralSources: ReferralSource[]
   operators: Operator[]
+  preselectedOperatorId?: string
 }
 
-export function LeadForm({ lead, referralSources, operators }: LeadFormProps) {
+export function LeadForm({ lead, referralSources, operators, preselectedOperatorId }: LeadFormProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
 
   const isEditing = !!lead
+  // If we have a preselectedOperatorId, use it. Otherwise fall back to lead's operator or empty.
+  const defaultOperatorId = preselectedOperatorId || lead?.operatorId || ''
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError('')
 
     const formData = new FormData(e.currentTarget)
+    // Ensure operatorId is included even if the select is disabled/hidden
+    if (preselectedOperatorId && !formData.get('operatorId')) {
+        formData.append('operatorId', preselectedOperatorId)
+    }
+
     const data: LeadFormData = {
       fullName: formData.get('fullName') as string,
       dni: formData.get('dni') as string,
@@ -69,12 +77,13 @@ export function LeadForm({ lead, referralSources, operators }: LeadFormProps) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <Card>
         <CardContent className="pt-6 space-y-4">
-          <div className="space-y-2">
+          <div className={`space-y-2 ${preselectedOperatorId ? 'hidden' : ''}`}>
             <Label htmlFor="operatorId">Operador *</Label>
             <Select
               name="operatorId"
-              defaultValue={lead?.operatorId || ''}
+              defaultValue={defaultOperatorId}
               required
+              disabled={!!preselectedOperatorId}
             >
               <SelectTrigger id="operatorId">
                 <SelectValue placeholder="Seleccionar operador" />
@@ -87,6 +96,10 @@ export function LeadForm({ lead, referralSources, operators }: LeadFormProps) {
                 ))}
               </SelectContent>
             </Select>
+            {/* Hidden input to ensure value is submitted if Select is disabled/hidden */}
+            {preselectedOperatorId && (
+                <input type="hidden" name="operatorId" value={preselectedOperatorId} />
+            )}
           </div>
 
           <div className="space-y-2">

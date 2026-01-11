@@ -89,6 +89,25 @@ export async function getLeadsBySupervisor(supervisorId: string): Promise<Lead[]
   return result.rows.map(mapRowToLead)
 }
 
+export async function getAllLeads(): Promise<Lead[]> {
+  const result = await pool.query<LeadRow & { user_name: string }>(
+    `SELECT
+      l.*,
+      rs.name as referral_source_name,
+      o.name as operator_name,
+      u.name as user_name
+    FROM leads l
+    LEFT JOIN referral_sources rs ON l.referral_source_id = rs.id
+    LEFT JOIN operators o ON l.operator_id = o.id
+    LEFT JOIN "user" u ON l.user_id = u.id
+    ORDER BY l.created_at DESC`
+  )
+  return result.rows.map((row) => ({
+    ...mapRowToLead(row),
+    userName: row.user_name,
+  }))
+}
+
 export async function getReferralSources(): Promise<ReferralSource[]> {
   const result = await pool.query<{ id: string; name: string; is_active: boolean }>(
     `SELECT id, name, is_active FROM referral_sources WHERE is_active = true ORDER BY name`

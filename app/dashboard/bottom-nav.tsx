@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Users, ShoppingCart, User, UsersRound } from 'lucide-react'
+import { Home, Users, ShoppingCart, User, ClipboardCheck } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const asesorNavItems = [
@@ -19,6 +19,13 @@ const supervisorNavItems = [
   { href: '/dashboard/profile', icon: User, label: 'Perfil' },
 ]
 
+const backofficeNavItems = [
+  { href: '/dashboard/backoffice', icon: Home, label: 'Inicio' },
+  { href: '/dashboard/backoffice/leads', icon: Users, label: 'Leads' },
+  { href: '/dashboard/backoffice/sales', icon: ShoppingCart, label: 'Ventas' },
+  { href: '/dashboard/profile', icon: User, label: 'Perfil' },
+]
+
 type BottomNavProps = {
   role?: string | null
 }
@@ -26,7 +33,12 @@ type BottomNavProps = {
 export function BottomNav({ role }: BottomNavProps) {
   const pathname = usePathname()
 
-  const navItems = role === 'supervisor' ? supervisorNavItems : asesorNavItems
+  const navItems =
+    role === 'backoffice'
+      ? backofficeNavItems
+      : role === 'supervisor'
+        ? supervisorNavItems
+        : asesorNavItems
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background">

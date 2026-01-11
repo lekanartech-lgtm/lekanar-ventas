@@ -129,6 +129,25 @@ export async function getSalesBySupervisor(supervisorId: string): Promise<Sale[]
   return result.rows.map(mapRowToSale)
 }
 
+export async function getAllSales(): Promise<Sale[]> {
+  const result = await pool.query<SaleRow & { user_name: string }>(
+    `SELECT
+      s.*,
+      p.name as plan_name,
+      o.name as operator_name,
+      u.name as user_name
+    FROM sales s
+    JOIN plans p ON s.plan_id = p.id
+    LEFT JOIN operators o ON s.operator_id = o.id
+    LEFT JOIN "user" u ON s.user_id = u.id
+    ORDER BY s.created_at DESC`
+  )
+  return result.rows.map((row) => ({
+    ...mapRowToSale(row),
+    userName: row.user_name,
+  }))
+}
+
 export async function getPlans(): Promise<Plan[]> {
   const result = await pool.query<{
     id: string
@@ -184,4 +203,25 @@ export async function getPlansByOperator(operatorId: string): Promise<Plan[]> {
     operatorId: row.operator_id,
     operatorName: row.operator_name ?? undefined,
   }))
+}
+
+export async function getSaleByIdForBackoffice(id: string): Promise<(Sale & { userName?: string }) | null> {
+  const result = await pool.query<SaleRow & { user_name: string }>(
+    `SELECT
+      s.*,
+      p.name as plan_name,
+      o.name as operator_name,
+      u.name as user_name
+    FROM sales s
+    JOIN plans p ON s.plan_id = p.id
+    LEFT JOIN operators o ON s.operator_id = o.id
+    LEFT JOIN "user" u ON s.user_id = u.id
+    WHERE s.id = $1`,
+    [id]
+  )
+  if (!result.rows[0]) return null
+  return {
+    ...mapRowToSale(result.rows[0]),
+    userName: result.rows[0].user_name,
+  }
 }

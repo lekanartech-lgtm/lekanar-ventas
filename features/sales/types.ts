@@ -40,6 +40,7 @@ export type Sale = {
   rejectionReason: string | null
 
   userId: string
+  userName?: string
   validatedBy: string | null
   validatedAt: Date | null
 
