@@ -71,7 +71,9 @@ export function SaleForm({ sale, lead, plans, operators }: SaleFormProps) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const latInput = document.getElementById('latitude') as HTMLInputElement
-        const lngInput = document.getElementById('longitude') as HTMLInputElement
+        const lngInput = document.getElementById(
+          'longitude'
+        ) as HTMLInputElement
         if (latInput && lngInput) {
           latInput.value = position.coords.latitude.toFixed(8)
           lngInput.value = position.coords.longitude.toFixed(8)
@@ -177,7 +179,7 @@ export function SaleForm({ sale, lead, plans, operators }: SaleFormProps) {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="dni">DNI *</Label>
               <Input
@@ -205,7 +207,7 @@ export function SaleForm({ sale, lead, plans, operators }: SaleFormProps) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="birthPlace">Lugar de nacimiento</Label>
               <Input
@@ -229,7 +231,7 @@ export function SaleForm({ sale, lead, plans, operators }: SaleFormProps) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="phone">Teléfono *</Label>
               <Input
@@ -273,7 +275,7 @@ export function SaleForm({ sale, lead, plans, operators }: SaleFormProps) {
           </div>
 
           {!isPhoneOwner && (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="phoneOwnerName">Nombre del titular *</Label>
                 <Input
@@ -346,7 +348,7 @@ export function SaleForm({ sale, lead, plans, operators }: SaleFormProps) {
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="department">Departamento *</Label>
               <Select
@@ -386,7 +388,7 @@ export function SaleForm({ sale, lead, plans, operators }: SaleFormProps) {
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center flex-wrap gap-2 justify-between">
               <Label>Coordenadas GPS</Label>
               <Button
                 type="button"
@@ -398,7 +400,7 @@ export function SaleForm({ sale, lead, plans, operators }: SaleFormProps) {
                 Obtener ubicación
               </Button>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid md:grid-cols-2 gap-4">
               <Input
                 id="latitude"
                 name="latitude"
@@ -431,7 +433,13 @@ export function SaleForm({ sale, lead, plans, operators }: SaleFormProps) {
               disabled={!selectedOperatorId}
             >
               <SelectTrigger id="planId">
-                <SelectValue placeholder={selectedOperatorId ? "Seleccionar plan" : "Selecciona un operador primero"} />
+                <SelectValue
+                  placeholder={
+                    selectedOperatorId
+                      ? 'Seleccionar plan'
+                      : 'Selecciona un operador primero'
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
                 {filteredPlans.map((plan) => (
@@ -443,7 +451,7 @@ export function SaleForm({ sale, lead, plans, operators }: SaleFormProps) {
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="price">Precio mensual (S/.) *</Label>
               <Input
@@ -487,9 +495,7 @@ export function SaleForm({ sale, lead, plans, operators }: SaleFormProps) {
         </CardContent>
       </Card>
 
-      {error && (
-        <p className="text-sm text-destructive text-center">{error}</p>
-      )}
+      {error && <p className="text-sm text-destructive text-center">{error}</p>}
 
       <Button type="submit" className="w-full" size="lg" disabled={isPending}>
         {isPending ? (
