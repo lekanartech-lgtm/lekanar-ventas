@@ -116,7 +116,7 @@ export function LeadForm({ lead, referralSources, operators, preselectedOperator
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="dni">DNI *</Label>
+              <Label htmlFor="dni">DNI</Label>
               <Input
                 id="dni"
                 name="dni"
@@ -124,7 +124,6 @@ export function LeadForm({ lead, referralSources, operators, preselectedOperator
                 placeholder="12345678"
                 maxLength={8}
                 pattern="[0-9]{8}"
-                required
                 inputMode="numeric"
               />
             </div>

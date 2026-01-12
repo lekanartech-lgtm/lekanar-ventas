@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, X } from 'lucide-react'
 import { LeadForm } from './lead-form'
 import type { Operator } from '@/features/operators'
 import type { ReferralSource } from '../types'
@@ -40,19 +40,23 @@ export function LeadCreationWizard({
     return (
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <div>
-          <h1 className="text-2xl font-bold">Selecciona un operador</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl font-bold text-center">
+            Selecciona un operador
+          </h1>
+          <p className="text-muted-foreground text-center">
             Elige el operador para el cual deseas registrar el nuevo lead.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="flex flex-wrap justify-center gap-4">
           {operators.map((operator) => (
             <Card
               key={operator.id}
               className={cn(
-                "cursor-pointer transition-all hover:shadow-md hover:border-primary/50 group",
-                operator.isActive ? "opacity-100" : "opacity-50 pointer-events-none"
+                'cursor-pointer transition-all w-64 hover:shadow-md hover:border-primary group',
+                operator.isActive
+                  ? 'opacity-100'
+                  : 'opacity-50 pointer-events-none'
               )}
               onClick={() => handleOperatorSelect(operator.id)}
             >
@@ -73,7 +77,9 @@ export function LeadCreationWizard({
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg">{operator.name}</h3>
-                  <p className="text-xs text-muted-foreground">{operator.code}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {operator.code}
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -85,18 +91,11 @@ export function LeadCreationWizard({
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between p-4 rounded-md border-2 border-sky-400 bg-white">
+        <h2 className="text-center text-xl">{selectedOperator?.name}</h2>
         <Button variant="ghost" size="icon" onClick={handleBack}>
-          <ArrowLeft className="h-4 w-4" />
+          <X />
         </Button>
-        <div>
-          <h1 className="text-xl font-bold">
-            Nuevo lead para <span className="text-primary">{selectedOperator?.name}</span>
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Completa los datos del prospecto
-          </p>
-        </div>
       </div>
 
       <LeadForm
