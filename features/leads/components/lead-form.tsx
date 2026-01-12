@@ -27,7 +27,12 @@ type LeadFormProps = {
   preselectedOperatorId?: string
 }
 
-export function LeadForm({ lead, referralSources, operators, preselectedOperatorId }: LeadFormProps) {
+export function LeadForm({
+  lead,
+  referralSources,
+  operators,
+  preselectedOperatorId,
+}: LeadFormProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
@@ -43,7 +48,7 @@ export function LeadForm({ lead, referralSources, operators, preselectedOperator
     const formData = new FormData(e.currentTarget)
     // Ensure operatorId is included even if the select is disabled/hidden
     if (preselectedOperatorId && !formData.get('operatorId')) {
-        formData.append('operatorId', preselectedOperatorId)
+      formData.append('operatorId', preselectedOperatorId)
     }
 
     const data: LeadFormData = {
@@ -98,7 +103,11 @@ export function LeadForm({ lead, referralSources, operators, preselectedOperator
             </Select>
             {/* Hidden input to ensure value is submitted if Select is disabled/hidden */}
             {preselectedOperatorId && (
-                <input type="hidden" name="operatorId" value={preselectedOperatorId} />
+              <input
+                type="hidden"
+                name="operatorId"
+                value={preselectedOperatorId}
+              />
             )}
           </div>
 
@@ -114,7 +123,7 @@ export function LeadForm({ lead, referralSources, operators, preselectedOperator
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="dni">DNI</Label>
               <Input
@@ -142,7 +151,7 @@ export function LeadForm({ lead, referralSources, operators, preselectedOperator
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="contactDate">Fecha de contacto</Label>
               <Input
@@ -232,9 +241,7 @@ export function LeadForm({ lead, referralSources, operators, preselectedOperator
         </CardContent>
       </Card>
 
-      {error && (
-        <p className="text-sm text-destructive text-center">{error}</p>
-      )}
+      {error && <p className="text-sm text-destructive text-center">{error}</p>}
 
       <Button type="submit" className="w-full" size="lg" disabled={isPending}>
         {isPending ? (
