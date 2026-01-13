@@ -40,9 +40,9 @@ export function BackofficeSaleForm({ sale }: { sale: BackofficeSale }) {
       data.score = parseInt(score)
     }
 
-    const winforceId = formData.get('winforceId') as string
-    if (winforceId !== (sale.winforceId || '')) {
-      data.winforceId = winforceId || null
+    const externalId = formData.get('externalId') as string
+    if (externalId !== (sale.externalId || '')) {
+      data.externalId = externalId || null
     }
 
     const contractNumber = formData.get('contractNumber') as string
@@ -127,12 +127,12 @@ export function BackofficeSaleForm({ sale }: { sale: BackofficeSale }) {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="winforceId">ID Winforce</Label>
+              <Label htmlFor="externalId">ID Externo</Label>
               <Input
-                id="winforceId"
-                name="winforceId"
-                defaultValue={sale.winforceId || ''}
-                placeholder="Ej: WF123456"
+                id="externalId"
+                name="externalId"
+                defaultValue={sale.externalId || ''}
+                placeholder="ID del sistema del operador"
               />
             </div>
 

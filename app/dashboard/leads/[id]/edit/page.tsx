@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { auth } from '@/features/auth/server'
-import { getLeadById, getReferralSources, LeadForm } from '@/features/leads'
+import { getLeadById, getReferralSources, getStates, LeadForm } from '@/features/leads'
 import { getOperators } from '@/features/operators'
 import { Button } from '@/components/ui/button'
 
@@ -17,10 +17,11 @@ export default async function EditLeadPage({
     headers: await headers(),
   })
 
-  const [lead, referralSources, operators] = await Promise.all([
+  const [lead, referralSources, operators, states] = await Promise.all([
     getLeadById(id, session!.user.id),
     getReferralSources(),
     getOperators(),
+    getStates(),
   ])
 
   if (!lead) {
@@ -41,7 +42,12 @@ export default async function EditLeadPage({
         </div>
       </div>
 
-      <LeadForm lead={lead} referralSources={referralSources} operators={operators} />
+      <LeadForm
+        lead={lead}
+        referralSources={referralSources}
+        operators={operators}
+        states={states}
+      />
     </div>
   )
 }

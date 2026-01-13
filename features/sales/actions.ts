@@ -159,12 +159,13 @@ export async function updateSale(id: string, data: Partial<SaleFormData>) {
 
 export type BackofficeUpdateData = {
   score?: number | null
-  winforceId?: string | null
+  externalId?: string | null
   contractNumber?: string | null
   requestStatus?: string
   orderStatus?: string
   rejectionReason?: string | null
   installationDate?: string | null
+  operatorMetadata?: Record<string, unknown>
 }
 
 export async function backofficeUpdateSale(id: string, data: BackofficeUpdateData) {
@@ -183,9 +184,9 @@ export async function backofficeUpdateSale(id: string, data: BackofficeUpdateDat
       fields.push(`score = $${paramIndex++}`)
       values.push(data.score)
     }
-    if (data.winforceId !== undefined) {
-      fields.push(`winforce_id = $${paramIndex++}`)
-      values.push(data.winforceId || null)
+    if (data.externalId !== undefined) {
+      fields.push(`external_id = $${paramIndex++}`)
+      values.push(data.externalId || null)
     }
     if (data.contractNumber !== undefined) {
       fields.push(`contract_number = $${paramIndex++}`)
@@ -206,6 +207,10 @@ export async function backofficeUpdateSale(id: string, data: BackofficeUpdateDat
     if (data.installationDate !== undefined) {
       fields.push(`installation_date = $${paramIndex++}`)
       values.push(data.installationDate || null)
+    }
+    if (data.operatorMetadata !== undefined) {
+      fields.push(`operator_metadata = $${paramIndex++}`)
+      values.push(JSON.stringify(data.operatorMetadata) as unknown as string)
     }
 
     if (fields.length === 0) {

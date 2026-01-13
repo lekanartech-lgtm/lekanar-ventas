@@ -1,5 +1,5 @@
 import { pool } from '@/lib/db'
-import type { Sale, Plan, RequestStatus, OrderStatus, AddressType } from './types'
+import type { Sale, Plan, DocumentType, RequestStatus, OrderStatus, AddressType } from './types'
 
 type SaleRow = {
   id: string
@@ -26,8 +26,9 @@ type SaleRow = {
   price: string
   score: number | null
   installation_date: Date | null
-  winforce_id: string | null
+  external_id: string | null
   contract_number: string | null
+  operator_metadata: Record<string, unknown> | null
   request_status: RequestStatus
   order_status: OrderStatus
   rejection_reason: string | null
@@ -66,8 +67,9 @@ function mapRowToSale(row: SaleRow): Sale {
     price: parseFloat(row.price),
     score: row.score,
     installationDate: row.installation_date,
-    winforceId: row.winforce_id,
+    externalId: row.external_id,
     contractNumber: row.contract_number,
+    operatorMetadata: row.operator_metadata ?? {},
     requestStatus: row.request_status,
     orderStatus: row.order_status,
     rejectionReason: row.rejection_reason,
@@ -224,4 +226,33 @@ export async function getSaleByIdForBackoffice(id: string): Promise<(Sale & { us
     ...mapRowToSale(result.rows[0]),
     userName: result.rows[0].user_name,
   }
+}
+
+export async function getDocumentTypesByOperator(operatorId: string): Promise<DocumentType[]> {
+  const result = await pool.query<{
+    id: string
+    operator_id: string | null
+    code: string
+    name: string
+    description: string | null
+    is_required: boolean
+    is_active: boolean
+    display_order: number
+  }>(
+    `SELECT * FROM document_types
+     WHERE operator_id = $1 AND is_active = true
+     ORDER BY display_order`,
+    [operatorId]
+  )
+
+  return result.rows.map((row) => ({
+    id: row.id,
+    operatorId: row.operator_id,
+    code: row.code,
+    name: row.name,
+    description: row.description,
+    isRequired: row.is_required,
+    isActive: row.is_active,
+    displayOrder: row.display_order,
+  }))
 }

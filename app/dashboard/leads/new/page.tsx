@@ -1,14 +1,15 @@
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
-import { getReferralSources } from '@/features/leads'
+import { getReferralSources, getStates } from '@/features/leads'
 import { LeadCreationWizard } from '@/features/leads/components/lead-creation-wizard'
 import { getOperators } from '@/features/operators'
 import { Button } from '@/components/ui/button'
 
 export default async function NewLeadPage() {
-  const [referralSources, operators] = await Promise.all([
+  const [referralSources, operators, states] = await Promise.all([
     getReferralSources(),
     getOperators(),
+    getStates(),
   ])
 
   return (
@@ -27,7 +28,11 @@ export default async function NewLeadPage() {
         </div>
       </div>
 
-      <LeadCreationWizard referralSources={referralSources} operators={operators} />
+      <LeadCreationWizard
+        referralSources={referralSources}
+        operators={operators}
+        states={states}
+      />
     </div>
   )
 }

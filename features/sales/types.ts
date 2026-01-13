@@ -32,8 +32,9 @@ export type Sale = {
 
   score: number | null
   installationDate: Date | null
-  winforceId: string | null
+  externalId: string | null
   contractNumber: string | null
+  operatorMetadata: Record<string, unknown>
 
   requestStatus: RequestStatus
   orderStatus: OrderStatus
@@ -93,4 +94,26 @@ export type Plan = {
   isActive: boolean
   operatorId: string | null
   operatorName?: string
+}
+
+export type DocumentType = {
+  id: string
+  operatorId: string | null
+  code: string
+  name: string
+  description: string | null
+  isRequired: boolean
+  isActive: boolean
+  displayOrder: number
+}
+
+export type SaleDocument = {
+  id: string
+  saleId: string
+  documentTypeId: string | null
+  documentTypeName?: string
+  fileUrl: string
+  fileName: string | null
+  fileSize: number | null
+  uploadedAt: Date
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,17 +13,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Card, CardContent } from '@/components/ui/card'
-import { Loader2 } from 'lucide-react'
-import { createLead, updateLead } from '../actions'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Loader2, MapPin } from 'lucide-react'
+import { createLead, updateLead, fetchCitiesByState, fetchDistrictsByCity } from '../actions'
 import { TIME_PREFERENCES, OPERATORS } from '../constants'
-import type { Lead, LeadFormData, ReferralSource } from '../types'
+import type { Lead, LeadFormData, ReferralSource, State, City, District } from '../types'
 import type { Operator } from '@/features/operators'
 
 type LeadFormProps = {
   lead?: Lead
   referralSources: ReferralSource[]
   operators: Operator[]
+  states: State[]
   preselectedOperatorId?: string
 }
 
@@ -31,22 +32,93 @@ export function LeadForm({
   lead,
   referralSources,
   operators,
+  states,
   preselectedOperatorId,
 }: LeadFormProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
 
+  // Location state
+  const [selectedStateId, setSelectedStateId] = useState(lead?.districtId?.slice(0, 2) || '')
+  const [selectedCityId, setSelectedCityId] = useState(lead?.districtId?.slice(0, 4) || '')
+  const [selectedDistrictId, setSelectedDistrictId] = useState(lead?.districtId || '')
+  const [cities, setCities] = useState<City[]>([])
+  const [districts, setDistricts] = useState<District[]>([])
+  const [loadingCities, setLoadingCities] = useState(false)
+  const [loadingDistricts, setLoadingDistricts] = useState(false)
+
+  // GPS state
+  const [latitude, setLatitude] = useState(lead?.latitude?.toString() || '')
+  const [longitude, setLongitude] = useState(lead?.longitude?.toString() || '')
+  const [gettingLocation, setGettingLocation] = useState(false)
+
   const isEditing = !!lead
-  // If we have a preselectedOperatorId, use it. Otherwise fall back to lead's operator or empty.
   const defaultOperatorId = preselectedOperatorId || lead?.operatorId || ''
+
+  // Load cities when state changes
+  useEffect(() => {
+    if (selectedStateId) {
+      setLoadingCities(true)
+      fetchCitiesByState(selectedStateId).then((data) => {
+        setCities(data)
+        setLoadingCities(false)
+        // Reset city and district if state changed
+        if (!lead?.districtId?.startsWith(selectedStateId)) {
+          setSelectedCityId('')
+          setSelectedDistrictId('')
+          setDistricts([])
+        }
+      })
+    } else {
+      setCities([])
+      setDistricts([])
+    }
+  }, [selectedStateId, lead?.districtId])
+
+  // Load districts when city changes
+  useEffect(() => {
+    if (selectedCityId) {
+      setLoadingDistricts(true)
+      fetchDistrictsByCity(selectedCityId).then((data) => {
+        setDistricts(data)
+        setLoadingDistricts(false)
+        // Reset district if city changed
+        if (!lead?.districtId?.startsWith(selectedCityId)) {
+          setSelectedDistrictId('')
+        }
+      })
+    } else {
+      setDistricts([])
+    }
+  }, [selectedCityId, lead?.districtId])
+
+  function handleGetLocation() {
+    if (!navigator.geolocation) {
+      setError('Tu navegador no soporta geolocalización')
+      return
+    }
+
+    setGettingLocation(true)
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLatitude(position.coords.latitude.toFixed(8))
+        setLongitude(position.coords.longitude.toFixed(8))
+        setGettingLocation(false)
+      },
+      (err) => {
+        setError('No se pudo obtener la ubicación: ' + err.message)
+        setGettingLocation(false)
+      },
+      { enableHighAccuracy: true }
+    )
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError('')
 
     const formData = new FormData(e.currentTarget)
-    // Ensure operatorId is included even if the select is disabled/hidden
     if (preselectedOperatorId && !formData.get('operatorId')) {
       formData.append('operatorId', preselectedOperatorId)
     }
@@ -61,6 +133,13 @@ export function LeadForm({
       currentOperator: formData.get('currentOperator') as string,
       notes: formData.get('notes') as string,
       operatorId: formData.get('operatorId') as string,
+      address: formData.get('address') as string,
+      stateId: selectedStateId,
+      cityId: selectedCityId,
+      districtId: selectedDistrictId,
+      latitude,
+      longitude,
+      reference: formData.get('reference') as string,
     }
 
     startTransition(async () => {
@@ -237,6 +316,131 @@ export function LeadForm({
               placeholder="Notas adicionales sobre el prospecto..."
               rows={3}
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Address Section */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Dirección (opcional)</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="address">Dirección</Label>
+            <Input
+              id="address"
+              name="address"
+              defaultValue={lead?.address || ''}
+              placeholder="Av. Principal 123, Urb. Las Flores"
+            />
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="stateId">Departamento</Label>
+              <Select
+                value={selectedStateId}
+                onValueChange={(value) => {
+                  setSelectedStateId(value)
+                  setSelectedCityId('')
+                  setSelectedDistrictId('')
+                }}
+              >
+                <SelectTrigger id="stateId">
+                  <SelectValue placeholder="Seleccionar" />
+                </SelectTrigger>
+                <SelectContent>
+                  {states.map((state) => (
+                    <SelectItem key={state.id} value={state.id}>
+                      {state.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="cityId">Provincia</Label>
+              <Select
+                value={selectedCityId}
+                onValueChange={(value) => {
+                  setSelectedCityId(value)
+                  setSelectedDistrictId('')
+                }}
+                disabled={!selectedStateId || loadingCities}
+              >
+                <SelectTrigger id="cityId">
+                  <SelectValue placeholder={loadingCities ? 'Cargando...' : 'Seleccionar'} />
+                </SelectTrigger>
+                <SelectContent>
+                  {cities.map((city) => (
+                    <SelectItem key={city.id} value={city.id}>
+                      {city.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="districtId">Distrito</Label>
+              <Select
+                value={selectedDistrictId}
+                onValueChange={setSelectedDistrictId}
+                disabled={!selectedCityId || loadingDistricts}
+              >
+                <SelectTrigger id="districtId">
+                  <SelectValue placeholder={loadingDistricts ? 'Cargando...' : 'Seleccionar'} />
+                </SelectTrigger>
+                <SelectContent>
+                  {districts.map((district) => (
+                    <SelectItem key={district.id} value={district.id}>
+                      {district.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="reference">Referencia</Label>
+            <Input
+              id="reference"
+              name="reference"
+              defaultValue={lead?.reference || ''}
+              placeholder="Frente al parque, casa color azul..."
+            />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label>Ubicación GPS</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleGetLocation}
+                disabled={gettingLocation}
+              >
+                {gettingLocation ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    <MapPin className="h-4 w-4 mr-1" />
+                    Obtener ubicación
+                  </>
+                )}
+              </Button>
+            </div>
+            {(latitude || longitude) && (
+              <p className="text-sm text-muted-foreground">
+                {latitude}, {longitude}
+              </p>
+            )}
+            <input type="hidden" name="latitude" value={latitude} />
+            <input type="hidden" name="longitude" value={longitude} />
           </div>
         </CardContent>
       </Card>

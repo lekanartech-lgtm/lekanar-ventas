@@ -4,7 +4,52 @@ import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { pool } from '@/lib/db'
 import { auth } from '@/features/auth/server'
-import type { LeadFormData } from './types'
+import type { LeadFormData, City, District } from './types'
+
+// Location actions (for client components)
+export async function fetchCitiesByState(stateId: string): Promise<City[]> {
+  const result = await pool.query<{
+    id: string
+    state_id: string
+    name: string
+    is_active: boolean
+  }>(
+    `SELECT id, state_id, name, is_active
+     FROM cities
+     WHERE state_id = $1 AND is_active = true
+     ORDER BY name`,
+    [stateId]
+  )
+  return result.rows.map((row) => ({
+    id: row.id,
+    stateId: row.state_id,
+    name: row.name,
+    isActive: row.is_active,
+  }))
+}
+
+export async function fetchDistrictsByCity(cityId: string): Promise<District[]> {
+  const result = await pool.query<{
+    id: string
+    city_id: string
+    state_id: string | null
+    name: string
+    is_active: boolean
+  }>(
+    `SELECT id, city_id, state_id, name, is_active
+     FROM districts
+     WHERE city_id = $1 AND is_active = true
+     ORDER BY name`,
+    [cityId]
+  )
+  return result.rows.map((row) => ({
+    id: row.id,
+    cityId: row.city_id,
+    stateId: row.state_id,
+    name: row.name,
+    isActive: row.is_active,
+  }))
+}
 
 export async function createLead(data: LeadFormData) {
   const session = await auth.api.getSession({ headers: await headers() })
@@ -17,8 +62,9 @@ export async function createLead(data: LeadFormData) {
     const result = await pool.query(
       `INSERT INTO leads (
         full_name, dni, phone, contact_date, contact_time_preference,
-        referral_source_id, current_operator, notes, user_id, operator_id
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        referral_source_id, current_operator, notes, user_id, operator_id,
+        address, district_id, latitude, longitude, reference
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
       RETURNING id`,
       [
         data.fullName,
@@ -31,6 +77,11 @@ export async function createLead(data: LeadFormData) {
         data.notes || null,
         session.user.id,
         data.operatorId || null,
+        data.address || null,
+        data.districtId || null,
+        data.latitude ? parseFloat(data.latitude) : null,
+        data.longitude ? parseFloat(data.longitude) : null,
+        data.reference || null,
       ]
     )
 
@@ -102,6 +153,26 @@ export async function updateLead(id: string, data: Partial<LeadFormData>) {
     if (data.operatorId !== undefined) {
       fields.push(`operator_id = $${paramIndex++}`)
       values.push(data.operatorId || null)
+    }
+    if (data.address !== undefined) {
+      fields.push(`address = $${paramIndex++}`)
+      values.push(data.address || null)
+    }
+    if (data.districtId !== undefined) {
+      fields.push(`district_id = $${paramIndex++}`)
+      values.push(data.districtId || null)
+    }
+    if (data.latitude !== undefined) {
+      fields.push(`latitude = $${paramIndex++}`)
+      values.push(data.latitude ? parseFloat(data.latitude).toString() : null)
+    }
+    if (data.longitude !== undefined) {
+      fields.push(`longitude = $${paramIndex++}`)
+      values.push(data.longitude ? parseFloat(data.longitude).toString() : null)
+    }
+    if (data.reference !== undefined) {
+      fields.push(`reference = $${paramIndex++}`)
+      values.push(data.reference || null)
     }
 
     if (fields.length === 0) {

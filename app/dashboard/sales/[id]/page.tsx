@@ -142,14 +142,14 @@ export default async function SaleDetailPage({
         </CardContent>
       </Card>
 
-      {/* Winforce */}
-      {(sale.winforceId || sale.contractNumber) && (
+      {/* Datos del operador */}
+      {(sale.externalId || sale.contractNumber) && (
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Winforce</CardTitle>
+            <CardTitle className="text-base">Datos del operador</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
-            {sale.winforceId && <p>ID Winforce: {sale.winforceId}</p>}
+            {sale.externalId && <p>ID Externo: {sale.externalId}</p>}
             {sale.contractNumber && <p>N° Contrato: {sale.contractNumber}</p>}
           </CardContent>
         </Card>

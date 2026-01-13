@@ -6,13 +6,14 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft, X } from 'lucide-react'
 import { LeadForm } from './lead-form'
 import type { Operator } from '@/features/operators'
-import type { ReferralSource } from '../types'
+import type { ReferralSource, State } from '../types'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
 
 type LeadCreationWizardProps = {
   operators: Operator[]
   referralSources: ReferralSource[]
+  states: State[]
 }
 
 type Step = 'selection' | 'form'
@@ -20,6 +21,7 @@ type Step = 'selection' | 'form'
 export function LeadCreationWizard({
   operators,
   referralSources,
+  states,
 }: LeadCreationWizardProps) {
   const [step, setStep] = useState<Step>('selection')
   const [selectedOperatorId, setSelectedOperatorId] = useState<string>('')
@@ -101,6 +103,7 @@ export function LeadCreationWizard({
       <LeadForm
         referralSources={referralSources}
         operators={operators}
+        states={states}
         preselectedOperatorId={selectedOperatorId}
       />
     </div>

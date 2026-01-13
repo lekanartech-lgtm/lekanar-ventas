@@ -14,7 +14,7 @@ DROP TYPE IF EXISTS document_type CASCADE;
 -- ENUM TYPES
 -- ============================================
 
-CREATE TYPE lead_status AS ENUM ('new', 'converted');
+CREATE TYPE lead_status AS ENUM ('new', 'ready', 'converted');
 
 CREATE TYPE address_type AS ENUM ('home', 'multifamily', 'condo');
 
