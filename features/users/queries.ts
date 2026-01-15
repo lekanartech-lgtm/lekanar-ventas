@@ -23,10 +23,11 @@ export async function getUsersWithAgency(): Promise<UserWithAgency[]> {
       u.banned,
       u.agency_id,
       a.name as agency_name,
-      a.city as agency_city,
+      c.name as agency_city,
       u."createdAt" as created_at
     FROM "user" u
     LEFT JOIN agencies a ON u.agency_id = a.id
+    LEFT JOIN cities c ON a.city_id = c.id
     ORDER BY u."createdAt" DESC`
   )
 
@@ -53,10 +54,11 @@ export async function getUsersByAgency(agencyId: string): Promise<UserWithAgency
       u.banned,
       u.agency_id,
       a.name as agency_name,
-      a.city as agency_city,
+      c.name as agency_city,
       u."createdAt" as created_at
     FROM "user" u
     LEFT JOIN agencies a ON u.agency_id = a.id
+    LEFT JOIN cities c ON a.city_id = c.id
     WHERE u.agency_id = $1
     ORDER BY u.name`,
     [agencyId]
@@ -85,10 +87,11 @@ export async function getAdvisors(): Promise<UserWithAgency[]> {
       u.banned,
       u.agency_id,
       a.name as agency_name,
-      a.city as agency_city,
+      c.name as agency_city,
       u."createdAt" as created_at
     FROM "user" u
     LEFT JOIN agencies a ON u.agency_id = a.id
+    LEFT JOIN cities c ON a.city_id = c.id
     WHERE u.role = 'asesor' AND (u.banned IS NULL OR u.banned = false)
     ORDER BY a.name, u.name`
   )
