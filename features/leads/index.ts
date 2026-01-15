@@ -14,4 +14,5 @@ export { createLead, updateLead, deleteLead, fetchCitiesByState, fetchDistrictsB
 export { LeadForm } from './components/lead-form'
 export { LeadsTable, LeadsCardList } from './components/leads-table'
 export { BackofficeLeadsTable } from './components/backoffice-leads-table'
+export { AdminLeadsTable } from './components/admin-leads-table'
 export { LeadStatusBadge } from './components/lead-status-badge'
