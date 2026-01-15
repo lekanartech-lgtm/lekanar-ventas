@@ -15,9 +15,20 @@ import {
 } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2, MapPin } from 'lucide-react'
-import { adminUpdateLead, fetchCitiesByState, fetchDistrictsByCity } from '../actions'
+import {
+  adminUpdateLead,
+  fetchCitiesByState,
+  fetchDistrictsByCity,
+} from '../actions'
 import { TIME_PREFERENCES, OPERATORS } from '../constants'
-import type { Lead, LeadFormData, ReferralSource, State, City, District } from '../types'
+import type {
+  Lead,
+  LeadFormData,
+  ReferralSource,
+  State,
+  City,
+  District,
+} from '../types'
 import type { Operator } from '@/features/operators'
 
 type AdminLeadFormProps = {
@@ -37,56 +48,97 @@ export function AdminLeadForm({
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
 
-  // Location state
-  const [selectedStateId, setSelectedStateId] = useState(lead.districtId?.slice(0, 2) || '')
-  const [selectedCityId, setSelectedCityId] = useState(lead.districtId?.slice(0, 4) || '')
-  const [selectedDistrictId, setSelectedDistrictId] = useState(lead.districtId || '')
+  const [selectedStateId, setSelectedStateId] = useState(
+    lead.districtId?.slice(0, 2) || ''
+  )
+  const [selectedCityId, setSelectedCityId] = useState(
+    lead.districtId?.slice(0, 4) || ''
+  )
+  const [selectedDistrictId, setSelectedDistrictId] = useState(
+    lead.districtId || ''
+  )
   const [cities, setCities] = useState<City[]>([])
   const [districts, setDistricts] = useState<District[]>([])
   const [loadingCities, setLoadingCities] = useState(false)
   const [loadingDistricts, setLoadingDistricts] = useState(false)
 
-  // GPS state
   const [latitude, setLatitude] = useState(lead.latitude?.toString() || '')
   const [longitude, setLongitude] = useState(lead.longitude?.toString() || '')
   const [gettingLocation, setGettingLocation] = useState(false)
 
-  // Load cities when state changes
   useEffect(() => {
-    if (selectedStateId) {
-      setLoadingCities(true)
-      fetchCitiesByState(selectedStateId).then((data) => {
-        setCities(data)
-        setLoadingCities(false)
-        // Reset city and district if state changed
-        if (!lead.districtId?.startsWith(selectedStateId)) {
-          setSelectedCityId('')
-          setSelectedDistrictId('')
-          setDistricts([])
-        }
-      })
-    } else {
-      setCities([])
-      setDistricts([])
-    }
-  }, [selectedStateId, lead.districtId])
+    if (!lead.districtId) return
 
-  // Load districts when city changes
-  useEffect(() => {
-    if (selectedCityId) {
-      setLoadingDistricts(true)
-      fetchDistrictsByCity(selectedCityId).then((data) => {
-        setDistricts(data)
-        setLoadingDistricts(false)
-        // Reset district if city changed
-        if (!lead.districtId?.startsWith(selectedCityId)) {
-          setSelectedDistrictId('')
+    let cancelled = false
+    const initialStateId = lead.districtId.slice(0, 2)
+    const initialCityId = lead.districtId.slice(0, 4)
+
+    async function loadInitialData() {
+      if (initialStateId) {
+        setLoadingCities(true)
+        try {
+          const citiesData = await fetchCitiesByState(initialStateId)
+          if (!cancelled) setCities(citiesData)
+        } catch (error) {
+          console.error(error)
+        } finally {
+          if (!cancelled) setLoadingCities(false)
         }
-      })
-    } else {
-      setDistricts([])
+      }
+
+      if (initialCityId) {
+        setLoadingDistricts(true)
+        try {
+          const districtsData = await fetchDistrictsByCity(initialCityId)
+          if (!cancelled) setDistricts(districtsData)
+        } catch (error) {
+          console.error(error)
+        } finally {
+          if (!cancelled) setLoadingDistricts(false)
+        }
+      }
     }
-  }, [selectedCityId, lead.districtId])
+
+    loadInitialData()
+
+    return () => {
+      cancelled = true
+    }
+  }, [lead])
+
+  const handleStateChange = async (stateId: string) => {
+    setSelectedStateId(stateId)
+    setSelectedCityId('')
+    setSelectedDistrictId('')
+    setDistricts([])
+
+    setLoadingCities(true)
+    try {
+      const data = await fetchCitiesByState(stateId)
+      setCities(data)
+    } catch (error) {
+      console.error(error)
+      setCities([])
+    } finally {
+      setLoadingCities(false)
+    }
+  }
+
+  const handleCityChange = async (cityId: string) => {
+    setSelectedCityId(cityId)
+    setSelectedDistrictId('')
+
+    setLoadingDistricts(true)
+    try {
+      const data = await fetchDistrictsByCity(cityId)
+      setDistricts(data)
+    } catch (error) {
+      console.error(error)
+      setDistricts([])
+    } finally {
+      setLoadingDistricts(false)
+    }
+  }
 
   function handleGetLocation() {
     if (!navigator.geolocation) {
@@ -156,7 +208,11 @@ export function AdminLeadForm({
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="operatorId">Operador *</Label>
-            <Select name="operatorId" defaultValue={lead.operatorId || ''} required>
+            <Select
+              name="operatorId"
+              defaultValue={lead.operatorId || ''}
+              required
+            >
               <SelectTrigger id="operatorId">
                 <SelectValue placeholder="Seleccionar operador" />
               </SelectTrigger>
@@ -320,14 +376,7 @@ export function AdminLeadForm({
           <div className="grid md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="stateId">Departamento</Label>
-              <Select
-                value={selectedStateId}
-                onValueChange={(value) => {
-                  setSelectedStateId(value)
-                  setSelectedCityId('')
-                  setSelectedDistrictId('')
-                }}
-              >
+              <Select value={selectedStateId} onValueChange={handleStateChange}>
                 <SelectTrigger id="stateId">
                   <SelectValue placeholder="Seleccionar" />
                 </SelectTrigger>
@@ -345,14 +394,13 @@ export function AdminLeadForm({
               <Label htmlFor="cityId">Provincia</Label>
               <Select
                 value={selectedCityId}
-                onValueChange={(value) => {
-                  setSelectedCityId(value)
-                  setSelectedDistrictId('')
-                }}
+                onValueChange={handleCityChange}
                 disabled={!selectedStateId || loadingCities}
               >
                 <SelectTrigger id="cityId">
-                  <SelectValue placeholder={loadingCities ? 'Cargando...' : 'Seleccionar'} />
+                  <SelectValue
+                    placeholder={loadingCities ? 'Cargando...' : 'Seleccionar'}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {cities.map((city) => (
@@ -372,7 +420,11 @@ export function AdminLeadForm({
                 disabled={!selectedCityId || loadingDistricts}
               >
                 <SelectTrigger id="districtId">
-                  <SelectValue placeholder={loadingDistricts ? 'Cargando...' : 'Seleccionar'} />
+                  <SelectValue
+                    placeholder={
+                      loadingDistricts ? 'Cargando...' : 'Seleccionar'
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {districts.map((district) => (
