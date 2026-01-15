@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { MoreHorizontal, Pencil, Power, PowerOff, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -18,17 +18,96 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { toggleAgencyStatus, updateAgency } from '../actions'
-import type { Agency } from '../types'
+import { fetchCitiesByState, fetchDistrictsByCity } from '@/features/leads/actions'
+import type { Agency, State, City, District } from '../types'
 
-export function AgencyActions({ agency }: { agency: Agency }) {
+type AgencyActionsProps = {
+  agency: Agency
+  states: State[]
+}
+
+export function AgencyActions({ agency, states }: AgencyActionsProps) {
   const [isPending, startTransition] = useTransition()
   const [editOpen, setEditOpen] = useState(false)
+
+  // Location state
+  const [selectedStateId, setSelectedStateId] = useState(agency.stateId || '')
+  const [selectedCityId, setSelectedCityId] = useState(agency.cityId || '')
+  const [selectedDistrictId, setSelectedDistrictId] = useState(agency.districtId || '')
+  const [cities, setCities] = useState<City[]>([])
+  const [districts, setDistricts] = useState<District[]>([])
+  const [loadingCities, setLoadingCities] = useState(false)
+  const [loadingDistricts, setLoadingDistricts] = useState(false)
+  const [initialized, setInitialized] = useState(false)
+
+  // Load initial cities and districts when editing
+  useEffect(() => {
+    if (editOpen && agency.stateId && !initialized) {
+      setLoadingCities(true)
+      fetchCitiesByState(agency.stateId).then((data) => {
+        setCities(data)
+        setLoadingCities(false)
+        if (agency.cityId) {
+          setLoadingDistricts(true)
+          fetchDistrictsByCity(agency.cityId).then((districtData) => {
+            setDistricts(districtData)
+            setLoadingDistricts(false)
+            setInitialized(true)
+          })
+        } else {
+          setInitialized(true)
+        }
+      })
+    }
+  }, [editOpen, agency.stateId, agency.cityId, initialized])
+
+  // Load cities when state changes (after initialization)
+  useEffect(() => {
+    if (initialized && selectedStateId && selectedStateId !== agency.stateId) {
+      setLoadingCities(true)
+      fetchCitiesByState(selectedStateId).then((data) => {
+        setCities(data)
+        setLoadingCities(false)
+        setSelectedCityId('')
+        setSelectedDistrictId('')
+        setDistricts([])
+      })
+    }
+  }, [selectedStateId, agency.stateId, initialized])
+
+  // Load districts when city changes (after initialization)
+  useEffect(() => {
+    if (initialized && selectedCityId && selectedCityId !== agency.cityId) {
+      setLoadingDistricts(true)
+      fetchDistrictsByCity(selectedCityId).then((data) => {
+        setDistricts(data)
+        setLoadingDistricts(false)
+        setSelectedDistrictId('')
+      })
+    }
+  }, [selectedCityId, agency.cityId, initialized])
 
   function handleToggleStatus() {
     startTransition(async () => {
       await toggleAgencyStatus(agency.id, !agency.isActive)
     })
+  }
+
+  function resetForm() {
+    setSelectedStateId(agency.stateId || '')
+    setSelectedCityId(agency.cityId || '')
+    setSelectedDistrictId(agency.districtId || '')
+    setInitialized(false)
+    setCities([])
+    setDistricts([])
   }
 
   async function handleEditSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -38,8 +117,11 @@ export function AgencyActions({ agency }: { agency: Agency }) {
     startTransition(async () => {
       const result = await updateAgency(agency.id, {
         name: formData.get('name') as string,
-        city: formData.get('city') as string,
         address: formData.get('address') as string,
+        countryId: 'PE',
+        stateId: selectedStateId,
+        cityId: selectedCityId,
+        districtId: selectedDistrictId,
       })
 
       if (result.success) {
@@ -82,14 +164,17 @@ export function AgencyActions({ agency }: { agency: Agency }) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+      <Dialog open={editOpen} onOpenChange={(isOpen) => {
+        setEditOpen(isOpen)
+        if (!isOpen) resetForm()
+      }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Editar agencia</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleEditSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-name">Nombre</Label>
+              <Label htmlFor="edit-name">Nombre *</Label>
               <Input
                 id="edit-name"
                 name="name"
@@ -97,15 +182,77 @@ export function AgencyActions({ agency }: { agency: Agency }) {
                 required
               />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="edit-city">Ciudad</Label>
-              <Input
-                id="edit-city"
-                name="city"
-                defaultValue={agency.city}
-                required
-              />
+              <Label htmlFor="edit-stateId">Departamento</Label>
+              <Select
+                value={selectedStateId}
+                onValueChange={(value) => {
+                  setSelectedStateId(value)
+                  if (value !== agency.stateId) {
+                    setSelectedCityId('')
+                    setSelectedDistrictId('')
+                  }
+                }}
+              >
+                <SelectTrigger id="edit-stateId">
+                  <SelectValue placeholder="Seleccionar departamento" />
+                </SelectTrigger>
+                <SelectContent>
+                  {states.map((state) => (
+                    <SelectItem key={state.id} value={state.id}>
+                      {state.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-cityId">Provincia</Label>
+              <Select
+                value={selectedCityId}
+                onValueChange={(value) => {
+                  setSelectedCityId(value)
+                  if (value !== agency.cityId) {
+                    setSelectedDistrictId('')
+                  }
+                }}
+                disabled={!selectedStateId || loadingCities}
+              >
+                <SelectTrigger id="edit-cityId">
+                  <SelectValue placeholder={loadingCities ? 'Cargando...' : 'Seleccionar provincia'} />
+                </SelectTrigger>
+                <SelectContent>
+                  {cities.map((city) => (
+                    <SelectItem key={city.id} value={city.id}>
+                      {city.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-districtId">Distrito</Label>
+              <Select
+                value={selectedDistrictId}
+                onValueChange={setSelectedDistrictId}
+                disabled={!selectedCityId || loadingDistricts}
+              >
+                <SelectTrigger id="edit-districtId">
+                  <SelectValue placeholder={loadingDistricts ? 'Cargando...' : 'Seleccionar distrito'} />
+                </SelectTrigger>
+                <SelectContent>
+                  {districts.map((district) => (
+                    <SelectItem key={district.id} value={district.id}>
+                      {district.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="edit-address">Dirección</Label>
               <Input
@@ -114,6 +261,7 @@ export function AgencyActions({ agency }: { agency: Agency }) {
                 defaultValue={agency.address || ''}
               />
             </div>
+
             <div className="flex justify-end gap-2">
               <Button
                 type="button"

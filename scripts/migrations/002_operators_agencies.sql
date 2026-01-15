@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS supervisor_advisors (
 -- ============================================
 
 -- Add agency_id to users
-ALTER TABLE "user" ADD COLUMN IF NOT EXISTS agency_id smallint REFERENCES agencies(id);
+ALTER TABLE "user" ADD COLUMN IF NOT EXISTS agency_id UUID REFERENCES agencies(id);
 
 -- Add operator_id to plans
 ALTER TABLE plans ADD COLUMN IF NOT EXISTS operator_id UUID REFERENCES operators(id);

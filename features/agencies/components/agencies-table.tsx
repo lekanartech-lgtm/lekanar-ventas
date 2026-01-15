@@ -26,95 +26,117 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { AgencyActions } from './agency-actions'
-import type { Agency } from '../types'
+import type { Agency, State } from '../types'
 
-const columns: ColumnDef<Agency>[] = [
-  {
-    accessorKey: 'name',
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        className="-ml-4"
-        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-      >
-        Nombre
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => (
-      <div className="font-medium">{row.getValue('name')}</div>
-    ),
-  },
-  {
-    accessorKey: 'city',
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        className="-ml-4"
-        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-      >
-        Ciudad
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => <div>{row.getValue('city')}</div>,
-  },
-  {
-    accessorKey: 'address',
-    header: 'Dirección',
-    cell: ({ row }) => {
-      const address = row.getValue('address') as string | null
-      return address || <span className="text-muted-foreground">-</span>
+function createColumns(states: State[]): ColumnDef<Agency>[] {
+  return [
+    {
+      accessorKey: 'name',
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="-ml-4"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Nombre
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <div className="font-medium">{row.getValue('name')}</div>
+      ),
     },
-  },
-  {
-    accessorKey: 'isActive',
-    header: 'Estado',
-    cell: ({ row }) => {
-      const isActive = row.getValue('isActive') as boolean
-      return isActive ? (
-        <Badge variant="outline" className="border-green-500 text-green-600">
-          Activa
-        </Badge>
-      ) : (
-        <Badge variant="destructive">Inactiva</Badge>
-      )
-    },
-  },
-  {
-    accessorKey: 'createdAt',
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        className="-ml-4"
-        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-      >
-        Fecha de creación
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => {
-      const date = row.getValue('createdAt') as Date
-      return (
-        <span className="text-muted-foreground">
-          {new Date(date).toLocaleDateString('es-ES', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-          })}
-        </span>
-      )
-    },
-  },
-  {
-    id: 'actions',
-    cell: ({ row }) => <AgencyActions agency={row.original} />,
-  },
-]
+    {
+      id: 'location',
+      header: 'Ubicación',
+      cell: ({ row }) => {
+        const agency = row.original
+        const parts = [
+          agency.districtName,
+          agency.cityName,
+          agency.stateName,
+        ].filter(Boolean)
 
-export function AgenciesTable({ agencies }: { agencies: Agency[] }) {
+        if (parts.length === 0) {
+          return <span className="text-muted-foreground">-</span>
+        }
+
+        return (
+          <div>
+            <div className="font-medium">{parts[0]}</div>
+            {parts.length > 1 && (
+              <div className="text-sm text-muted-foreground">
+                {parts.slice(1).join(', ')}
+              </div>
+            )}
+          </div>
+        )
+      },
+    },
+    {
+      accessorKey: 'address',
+      header: 'Dirección',
+      cell: ({ row }) => {
+        const address = row.getValue('address') as string | null
+        return address || <span className="text-muted-foreground">-</span>
+      },
+    },
+    {
+      accessorKey: 'isActive',
+      header: 'Estado',
+      cell: ({ row }) => {
+        const isActive = row.getValue('isActive') as boolean
+        return isActive ? (
+          <Badge variant="outline" className="border-green-500 text-green-600">
+            Activa
+          </Badge>
+        ) : (
+          <Badge variant="destructive">Inactiva</Badge>
+        )
+      },
+    },
+    {
+      accessorKey: 'createdAt',
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="-ml-4"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Fecha de creación
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const date = row.getValue('createdAt') as Date
+        return (
+          <span className="text-muted-foreground">
+            {new Date(date).toLocaleDateString('es-ES', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+            })}
+          </span>
+        )
+      },
+    },
+    {
+      id: 'actions',
+      cell: ({ row }) => <AgencyActions agency={row.original} states={states} />,
+    },
+  ]
+}
+
+type AgenciesTableProps = {
+  agencies: Agency[]
+  states: State[]
+}
+
+export function AgenciesTable({ agencies, states }: AgenciesTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+
+  const columns = createColumns(states)
 
   const table = useReactTable({
     data: agencies,

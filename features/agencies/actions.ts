@@ -4,12 +4,7 @@ import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { pool } from '@/lib/db'
 import { auth } from '@/features/auth/server'
-
-export type AgencyFormData = {
-  name: string
-  city: string
-  address: string
-}
+import type { AgencyFormData } from './types'
 
 export async function createAgency(data: AgencyFormData) {
   const session = await auth.api.getSession({ headers: await headers() })
@@ -20,10 +15,17 @@ export async function createAgency(data: AgencyFormData) {
 
   try {
     const result = await pool.query(
-      `INSERT INTO agencies (name, city, address)
-       VALUES ($1, $2, $3)
+      `INSERT INTO agencies (name, address, district_id, city_id, state_id, country_id)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id`,
-      [data.name, data.city, data.address || null]
+      [
+        data.name,
+        data.address || null,
+        data.districtId || null,
+        data.cityId || null,
+        data.stateId || null,
+        data.countryId || null,
+      ]
     )
 
     revalidatePath('/admin/settings')
@@ -44,9 +46,17 @@ export async function updateAgency(agencyId: string, data: AgencyFormData) {
   try {
     await pool.query(
       `UPDATE agencies
-       SET name = $1, city = $2, address = $3, updated_at = NOW()
-       WHERE id = $4`,
-      [data.name, data.city, data.address || null, agencyId]
+       SET name = $1, address = $2, district_id = $3, city_id = $4, state_id = $5, country_id = $6
+       WHERE id = $7`,
+      [
+        data.name,
+        data.address || null,
+        data.districtId || null,
+        data.cityId || null,
+        data.stateId || null,
+        data.countryId || null,
+        agencyId,
+      ]
     )
 
     revalidatePath('/admin/settings')
@@ -66,7 +76,7 @@ export async function toggleAgencyStatus(agencyId: string, isActive: boolean) {
 
   try {
     await pool.query(
-      `UPDATE agencies SET is_active = $1, updated_at = NOW() WHERE id = $2`,
+      `UPDATE agencies SET is_active = $1 WHERE id = $2`,
       [isActive, agencyId]
     )
 
