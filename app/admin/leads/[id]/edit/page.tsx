@@ -1,7 +1,11 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
-import { getLeadByIdForAdmin, getReferralSources, getStates } from '@/features/leads'
+import {
+  getLeadByIdForAdmin,
+  getReferralSources,
+  getStates,
+} from '@/features/leads'
 import { AdminLeadForm } from '@/features/leads/components/admin-lead-form'
 import { getOperators } from '@/features/operators'
 import { Button } from '@/components/ui/button'
@@ -40,7 +44,7 @@ export default async function AdminEditLeadPage({
         </div>
       </div>
 
-      <div className="max-w-2xl">
+      <div className="max-w-2xl mx-auto">
         <AdminLeadForm
           lead={lead}
           referralSources={referralSources}
