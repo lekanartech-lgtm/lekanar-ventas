@@ -100,13 +100,12 @@ CREATE TRIGGER update_agencies_updated_at
 
 -- Insert operators
 INSERT INTO operators (name, code) VALUES
-  ('WIN', 'win'),
+  ('Win', 'win'),
   ('Mi Fibra', 'mifibra')
 ON CONFLICT (code) DO NOTHING;
 
 -- Insert agencies
-INSERT INTO agencies (name, city) VALUES
-  ('Lima', 'Lima'),
+INSERT INTO agencies (name, address) VALUES
   ('Arequipa', 'Arequipa'),
   ('Cusco', 'Cusco')
 ON CONFLICT (name) DO NOTHING;
