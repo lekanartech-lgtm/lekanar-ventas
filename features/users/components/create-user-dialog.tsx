@@ -143,12 +143,7 @@ export function CreateUserDialog() {
               <SelectContent>
                 {roleOptions.map((r) => (
                   <SelectItem key={r.value} value={r.value}>
-                    <div className="flex flex-col">
-                      <span>{r.label}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {r.description}
-                      </span>
-                    </div>
+                    {r.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -161,7 +156,7 @@ export function CreateUserDialog() {
             </div>
           )}
 
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="gap-2">
             <Button
               type="button"
               variant="outline"
