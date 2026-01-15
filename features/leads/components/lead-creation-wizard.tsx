@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { LeadForm } from './lead-form'
 import type { Operator } from '@/features/operators'
 import type { ReferralSource, State } from '../types'
@@ -22,8 +22,14 @@ export function LeadCreationWizard({
   referralSources,
   states,
 }: LeadCreationWizardProps) {
-  const [step, setStep] = useState<Step>('selection')
-  const [selectedOperatorId, setSelectedOperatorId] = useState<string>('')
+  const autoSelectedOperator = operators.length === 1 ? operators[0] : null
+
+  const [step, setStep] = useState<Step>(
+    autoSelectedOperator ? 'form' : 'selection'
+  )
+  const [selectedOperatorId, setSelectedOperatorId] = useState<string>(
+    autoSelectedOperator?.id ?? ''
+  )
 
   const handleOperatorSelect = (operatorId: string) => {
     setSelectedOperatorId(operatorId)
