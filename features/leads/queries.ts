@@ -102,6 +102,33 @@ export async function getLeadById(id: string, userId: string): Promise<Lead | nu
   return result.rows[0] ? mapRowToLead(result.rows[0]) : null
 }
 
+export async function getLeadByIdForAdmin(id: string): Promise<(Lead & { userName?: string }) | null> {
+  const result = await pool.query<LeadRow & { user_name: string }>(
+    `SELECT
+      l.*,
+      rs.name as referral_source_name,
+      o.name as operator_name,
+      u.name as user_name,
+      d.name as district_name,
+      c.name as city_name,
+      s.name as state_name
+    FROM leads l
+    LEFT JOIN referral_sources rs ON l.referral_source_id = rs.id
+    LEFT JOIN operators o ON l.operator_id = o.id
+    LEFT JOIN "user" u ON l.user_id = u.id
+    LEFT JOIN districts d ON l.district_id = d.id
+    LEFT JOIN cities c ON d.city_id = c.id
+    LEFT JOIN states s ON c.state_id = s.id
+    WHERE l.id = $1`,
+    [id]
+  )
+  if (!result.rows[0]) return null
+  return {
+    ...mapRowToLead(result.rows[0]),
+    userName: result.rows[0].user_name,
+  }
+}
+
 export async function getLeadsBySupervisor(supervisorId: string): Promise<Lead[]> {
   const result = await pool.query<LeadRow>(
     `SELECT

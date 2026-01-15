@@ -225,3 +225,101 @@ export async function deleteLead(id: string) {
     return { error: 'Error al eliminar el lead' }
   }
 }
+
+export async function adminUpdateLead(id: string, data: Partial<LeadFormData>) {
+  const session = await auth.api.getSession({ headers: await headers() })
+
+  if (!session || session.user.role !== 'admin') {
+    return { error: 'No autorizado' }
+  }
+
+  try {
+    const existing = await pool.query(
+      'SELECT id FROM leads WHERE id = $1',
+      [id]
+    )
+
+    if (existing.rows.length === 0) {
+      return { error: 'Lead no encontrado' }
+    }
+
+    const fields: string[] = []
+    const values: (string | null)[] = []
+    let paramIndex = 1
+
+    if (data.fullName !== undefined) {
+      fields.push(`full_name = $${paramIndex++}`)
+      values.push(data.fullName)
+    }
+    if (data.dni !== undefined) {
+      fields.push(`dni = $${paramIndex++}`)
+      values.push(data.dni)
+    }
+    if (data.phone !== undefined) {
+      fields.push(`phone = $${paramIndex++}`)
+      values.push(data.phone)
+    }
+    if (data.contactDate !== undefined) {
+      fields.push(`contact_date = $${paramIndex++}`)
+      values.push(data.contactDate)
+    }
+    if (data.contactTimePreference !== undefined) {
+      fields.push(`contact_time_preference = $${paramIndex++}`)
+      values.push(data.contactTimePreference || null)
+    }
+    if (data.referralSourceId !== undefined) {
+      fields.push(`referral_source_id = $${paramIndex++}`)
+      values.push(data.referralSourceId || null)
+    }
+    if (data.currentOperator !== undefined) {
+      fields.push(`current_operator = $${paramIndex++}`)
+      values.push(data.currentOperator || null)
+    }
+    if (data.notes !== undefined) {
+      fields.push(`notes = $${paramIndex++}`)
+      values.push(data.notes || null)
+    }
+    if (data.operatorId !== undefined) {
+      fields.push(`operator_id = $${paramIndex++}`)
+      values.push(data.operatorId || null)
+    }
+    if (data.address !== undefined) {
+      fields.push(`address = $${paramIndex++}`)
+      values.push(data.address || null)
+    }
+    if (data.districtId !== undefined) {
+      fields.push(`district_id = $${paramIndex++}`)
+      values.push(data.districtId || null)
+    }
+    if (data.latitude !== undefined) {
+      fields.push(`latitude = $${paramIndex++}`)
+      values.push(data.latitude ? parseFloat(data.latitude).toString() : null)
+    }
+    if (data.longitude !== undefined) {
+      fields.push(`longitude = $${paramIndex++}`)
+      values.push(data.longitude ? parseFloat(data.longitude).toString() : null)
+    }
+    if (data.reference !== undefined) {
+      fields.push(`reference = $${paramIndex++}`)
+      values.push(data.reference || null)
+    }
+
+    if (fields.length === 0) {
+      return { error: 'No hay campos para actualizar' }
+    }
+
+    values.push(id)
+
+    await pool.query(
+      `UPDATE leads SET ${fields.join(', ')}, updated_at = NOW() WHERE id = $${paramIndex}`,
+      values
+    )
+
+    revalidatePath('/admin/leads')
+    revalidatePath(`/admin/leads/${id}`)
+    return { success: true }
+  } catch (error) {
+    console.error('Error updating lead:', error)
+    return { error: 'Error al actualizar el lead' }
+  }
+}

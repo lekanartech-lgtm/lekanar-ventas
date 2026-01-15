@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -12,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { ArrowUpDown, Search, Phone } from 'lucide-react'
+import { ArrowUpDown, Search, Phone, Pencil } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -143,6 +144,19 @@ const columns: ColumnDef<AdminLead>[] = [
             year: 'numeric',
           })}
         </span>
+      )
+    },
+  },
+  {
+    id: 'actions',
+    cell: ({ row }) => {
+      const lead = row.original
+      return (
+        <Button variant="ghost" size="icon" asChild>
+          <Link href={`/admin/leads/${lead.id}/edit`}>
+            <Pencil className="h-4 w-4" />
+          </Link>
+        </Button>
       )
     },
   },
