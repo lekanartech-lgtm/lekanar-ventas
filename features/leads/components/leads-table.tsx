@@ -13,7 +13,15 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { ArrowUpDown, Search, Phone, MoreHorizontal, Pencil, Trash2, ShoppingCart } from 'lucide-react'
+import {
+  ArrowUpDown,
+  Search,
+  Phone,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+  ShoppingCart,
+} from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -212,7 +220,7 @@ export function LeadsTable({ leads }: { leads: Lead[] }) {
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   ))}
@@ -227,7 +235,7 @@ export function LeadsTable({ leads }: { leads: Lead[] }) {
                       <TableCell key={cell.id}>
                         {flexRender(
                           cell.column.columnDef.cell,
-                          cell.getContext()
+                          cell.getContext(),
                         )}
                       </TableCell>
                     ))}
@@ -308,7 +316,9 @@ export function LeadsCardList({ leads }: { leads: Lead[] }) {
               </div>
               <div className="flex flex-col items-end gap-2">
                 {lead.operatorName && (
-                  <span className="text-xs font-medium text-primary">{lead.operatorName}</span>
+                  <span className="text-xs font-medium text-primary">
+                    {lead.operatorName}
+                  </span>
                 )}
                 <LeadStatusBadge status={lead.status} />
                 <span className="text-xs text-muted-foreground">
@@ -328,7 +338,12 @@ export function LeadsCardList({ leads }: { leads: Lead[] }) {
                   </Link>
                 </Button>
               )}
-              <Button variant="outline" size="sm" className={lead.status === 'new' ? '' : 'flex-1'} asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className={lead.status === 'new' ? '' : 'flex-1'}
+                asChild
+              >
                 <Link href={`/dashboard/leads/${lead.id}/edit`}>
                   <Pencil className="mr-2 h-3 w-3" />
                   Editar
