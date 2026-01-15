@@ -2,6 +2,7 @@ import { headers } from 'next/headers'
 import { Users, UserCheck, UserX, TrendingUp } from 'lucide-react'
 import { auth } from '@/features/auth/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { PageHeader } from '@/components/page-header'
 
 export default async function AdminPage() {
   const response = await auth.api.listUsers({
@@ -46,10 +47,10 @@ export default async function AdminPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">Resumen general del sistema</p>
-      </div>
+      <PageHeader
+        title="Dashboard"
+        description="Resumen general del sistema"
+      />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
