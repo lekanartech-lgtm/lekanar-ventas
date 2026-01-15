@@ -7,7 +7,6 @@ import { ArrowLeft, X } from 'lucide-react'
 import { LeadForm } from './lead-form'
 import type { Operator } from '@/features/operators'
 import type { ReferralSource, State } from '../types'
-import Image from 'next/image'
 import { cn } from '@/lib/utils'
 
 type LeadCreationWizardProps = {
@@ -65,11 +64,10 @@ export function LeadCreationWizard({
               <CardContent className="flex flex-col items-center justify-center p-6 gap-4 text-center h-full">
                 <div className="w-16 h-16 relative flex items-center justify-center bg-muted rounded-full overflow-hidden group-hover:scale-105 transition-transform duration-300">
                   {operator.logoUrl ? (
-                    <Image
+                    <img
                       src={operator.logoUrl}
                       alt={operator.name}
-                      fill
-                      className="object-cover"
+                      className="w-full h-full object-cover"
                     />
                   ) : (
                     <span className="text-2xl font-bold text-muted-foreground">
