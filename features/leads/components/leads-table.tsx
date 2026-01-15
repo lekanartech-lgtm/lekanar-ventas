@@ -1,287 +1,85 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import {
-  ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from '@tanstack/react-table'
-import {
-  ArrowUpDown,
-  Search,
-  Phone,
   MoreHorizontal,
   Pencil,
   Trash2,
   ShoppingCart,
+  Phone,
 } from 'lucide-react'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { BaseLeadsTable } from './base-leads-table'
 import { LeadStatusBadge } from './lead-status-badge'
-import { OPERATORS } from '../constants'
+import {
+  createClientColumn,
+  createPhoneColumn,
+  createOperatorColumn,
+  createCurrentOperatorColumn,
+  createStatusColumn,
+  createDateColumn,
+  createActionsColumn,
+  type BaseLead,
+} from './lead-columns'
 import type { Lead } from '../types'
 
-function getOperatorLabel(value: string | null): string {
-  if (!value) return '-'
-  const op = OPERATORS.find((o) => o.value === value)
-  return op?.label || value
+function LeadActions({ lead }: { lead: Lead }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon">
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {lead.status === 'new' && (
+          <DropdownMenuItem asChild>
+            <Link href={`/dashboard/sales/new?leadId=${lead.id}`}>
+              <ShoppingCart className="mr-2 h-4 w-4" />
+              Convertir a venta
+            </Link>
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuItem asChild>
+          <Link href={`/dashboard/leads/${lead.id}/edit`}>
+            <Pencil className="mr-2 h-4 w-4" />
+            Editar
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem className="text-destructive">
+          <Trash2 className="mr-2 h-4 w-4" />
+          Eliminar
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
 }
 
-const columns: ColumnDef<Lead>[] = [
-  {
-    accessorKey: 'fullName',
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        className="-ml-4"
-        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-      >
-        Cliente
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => {
-      const lead = row.original
-      return (
-        <div>
-          <div className="font-medium">{lead.fullName}</div>
-          <div className="text-sm text-muted-foreground">DNI: {lead.dni}</div>
-        </div>
-      )
-    },
-  },
-  {
-    accessorKey: 'phone',
-    header: 'Teléfono',
-    cell: ({ row }) => {
-      const phone = row.getValue('phone') as string
-      return (
-        <a
-          href={`tel:${phone}`}
-          className="flex items-center gap-1 text-primary hover:underline"
-        >
-          <Phone className="h-3 w-3" />
-          {phone}
-        </a>
-      )
-    },
-  },
-  {
-    accessorKey: 'operatorName',
-    header: 'Operador',
-    cell: ({ row }) => {
-      const operatorName = row.getValue('operatorName') as string | undefined
-      return operatorName || '-'
-    },
-  },
-  {
-    accessorKey: 'currentOperator',
-    header: 'ISP Actual',
-    cell: ({ row }) => getOperatorLabel(row.getValue('currentOperator')),
-  },
-  {
-    accessorKey: 'status',
-    header: 'Estado',
-    cell: ({ row }) => <LeadStatusBadge status={row.getValue('status')} />,
-  },
-  {
-    accessorKey: 'createdAt',
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        className="-ml-4"
-        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-      >
-        Fecha
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => {
-      const date = row.getValue('createdAt') as Date
-      return (
-        <span className="text-muted-foreground">
-          {new Date(date).toLocaleDateString('es-PE', {
-            day: '2-digit',
-            month: 'short',
-          })}
-        </span>
-      )
-    },
-  },
-  {
-    id: 'actions',
-    cell: ({ row }) => {
-      const lead = row.original
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {lead.status === 'new' && (
-              <DropdownMenuItem asChild>
-                <Link href={`/dashboard/sales/new?leadId=${lead.id}`}>
-                  <ShoppingCart className="mr-2 h-4 w-4" />
-                  Convertir a venta
-                </Link>
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuItem asChild>
-              <Link href={`/dashboard/leads/${lead.id}/edit`}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Editar
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">
-              <Trash2 className="mr-2 h-4 w-4" />
-              Eliminar
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
-    },
-  },
+const columns = [
+  createClientColumn<Lead>(),
+  createPhoneColumn<Lead>(),
+  createOperatorColumn<Lead>(),
+  createCurrentOperatorColumn<Lead>(),
+  createStatusColumn<Lead>(),
+  createDateColumn<Lead>(),
+  createActionsColumn<Lead>((lead) => <LeadActions lead={lead} />),
 ]
 
 export function LeadsTable({ leads }: { leads: Lead[] }) {
-  const [sorting, setSorting] = useState<SortingState>([
-    { id: 'createdAt', desc: true },
-  ])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [globalFilter, setGlobalFilter] = useState('')
-
-  const table = useReactTable({
-    data: leads,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn: 'includesString',
-    state: {
-      sorting,
-      columnFilters,
-      globalFilter,
-    },
-    initialState: {
-      pagination: { pageSize: 10 },
-    },
-  })
-
   return (
-    <Card>
-      <CardHeader className="pb-4">
-        <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por nombre o DNI..."
-            value={globalFilter}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            className="pl-9"
-          />
-        </div>
-      </CardHeader>
-      <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center text-muted-foreground"
-                  >
-                    No hay leads registrados
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-
-        {table.getPageCount() > 1 && (
-          <div className="flex items-center justify-between border-t px-4 py-3">
-            <p className="text-sm text-muted-foreground">
-              {table.getFilteredRowModel().rows.length} leads
-            </p>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
-              >
-                Anterior
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
-              >
-                Siguiente
-              </Button>
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+    <BaseLeadsTable
+      leads={leads}
+      columns={columns}
+      searchPlaceholder="Buscar por nombre o DNI..."
+      pageSize={10}
+    />
   )
 }
 

@@ -18,3 +18,17 @@ export { BackofficeLeadsTable } from './components/backoffice-leads-table'
 export { AdminLeadsTable } from './components/admin-leads-table'
 export { AdminLeadForm } from './components/admin-lead-form'
 export { LeadStatusBadge } from './components/lead-status-badge'
+// Reusable table components
+export { BaseLeadsTable } from './components/base-leads-table'
+export {
+  createClientColumn,
+  createAdvisorColumn,
+  createPhoneColumn,
+  createOperatorColumn,
+  createCurrentOperatorColumn,
+  createLocationColumn,
+  createStatusColumn,
+  createDateColumn,
+  createActionsColumn,
+  type BaseLead,
+} from './components/lead-columns'
