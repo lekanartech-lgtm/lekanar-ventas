@@ -20,6 +20,13 @@ export async function getAgencies(): Promise<Agency[]> {
   return result.rows.map(mapRowToAgency)
 }
 
+export async function getAllAgencies(): Promise<Agency[]> {
+  const result = await pool.query<AgencyRow>(
+    `SELECT * FROM agencies ORDER BY name`
+  )
+  return result.rows.map(mapRowToAgency)
+}
+
 export async function getAgencyById(id: string): Promise<Agency | null> {
   const result = await pool.query<AgencyRow>(
     `SELECT * FROM agencies WHERE id = $1`,

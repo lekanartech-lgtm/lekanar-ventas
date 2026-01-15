@@ -39,7 +39,10 @@ const navigation = [
   },
   {
     title: 'Administración',
-    items: [{ title: 'Usuarios', href: '/admin/users', icon: Users }],
+    items: [
+      { title: 'Usuarios', href: '/admin/users', icon: Users },
+      { title: 'Configuraciones', href: '/admin/settings', icon: Settings },
+    ],
   },
 ]
 

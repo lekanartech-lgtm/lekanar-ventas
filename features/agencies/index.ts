@@ -1,2 +1,6 @@
 export * from './types'
 export * from './queries'
+export * from './actions'
+export { AgenciesTable } from './components/agencies-table'
+export { AgencyActions } from './components/agency-actions'
+export { CreateAgencyDialog } from './components/create-agency-dialog'
