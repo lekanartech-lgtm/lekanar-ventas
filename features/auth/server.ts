@@ -4,12 +4,12 @@ import { admin as adminPlugin } from 'better-auth/plugins'
 import { pool } from '@/lib/db'
 import { ac, roles } from './permissions'
 
+const trustedOrigins = process.env.TRUSTED_ORIGINS?.split(',') || [
+  'http://localhost:3000',
+]
+
 export const auth = betterAuth({
-  // trustedOrigins: ['http://localhost:3000', 'http://192.168.0.45:3000'],
-  trustedOrigins: [
-    'http://192.168.0.45:3000',
-    'https://2b2bad93a64b.ngrok-free.app',
-  ],
+  trustedOrigins,
   database: pool,
 
   emailAndPassword: {

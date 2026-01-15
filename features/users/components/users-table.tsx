@@ -28,7 +28,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { UserActions } from './user-actions'
 import { ROLE_CONFIG } from '../constants'
-import type { User } from '../types'
+import type { UserWithAgency } from '../types'
 import type { Role } from '@/features/auth/permissions'
 
 function getInitials(name: string): string {
@@ -40,7 +40,7 @@ function getInitials(name: string): string {
     .slice(0, 2)
 }
 
-const columns: ColumnDef<User>[] = [
+const columns: ColumnDef<UserWithAgency>[] = [
   {
     accessorKey: 'name',
     header: ({ column }) => (
@@ -89,6 +89,31 @@ const columns: ColumnDef<User>[] = [
     },
   },
   {
+    accessorKey: 'agencyName',
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        className="-ml-4"
+        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+      >
+        Agencia
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      const user = row.original
+      if (!user.agencyName) {
+        return <span className="text-muted-foreground">-</span>
+      }
+      return (
+        <div>
+          <div className="font-medium">{user.agencyName}</div>
+          <div className="text-sm text-muted-foreground">{user.agencyCity}</div>
+        </div>
+      )
+    },
+  },
+  {
     accessorKey: 'banned',
     header: 'Estado',
     cell: ({ row }) => {
@@ -133,7 +158,7 @@ const columns: ColumnDef<User>[] = [
   },
 ]
 
-export function UsersTable({ users }: { users: User[] }) {
+export function UsersTable({ users }: { users: UserWithAgency[] }) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 

@@ -1,12 +1,7 @@
-import { headers } from 'next/headers'
-import { auth } from '@/features/auth/server'
-import { UsersTable, CreateUserDialog } from '@/features/users'
+import { UsersTable, CreateUserDialog, getUsersWithAgency } from '@/features/users'
 
 export default async function UsersPage() {
-  const response = await auth.api.listUsers({
-    headers: await headers(),
-    query: {},
-  })
+  const users = await getUsersWithAgency()
 
   return (
     <div className="space-y-6">
@@ -20,7 +15,7 @@ export default async function UsersPage() {
         <CreateUserDialog />
       </div>
 
-      <UsersTable users={response.users} />
+      <UsersTable users={users} />
     </div>
   )
 }

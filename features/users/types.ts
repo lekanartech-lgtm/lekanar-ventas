@@ -6,3 +6,9 @@ export type User = {
   banned?: boolean | null
   createdAt: Date
 }
+
+export type UserWithAgency = User & {
+  agencyId: string | null
+  agencyName: string | null
+  agencyCity: string | null
+}

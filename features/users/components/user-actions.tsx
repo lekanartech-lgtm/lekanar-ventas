@@ -17,14 +17,14 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { authClient } from '@/features/auth/client'
 import { ROLE_CONFIG } from '../constants'
-import type { User } from '../types'
+import type { UserWithAgency } from '../types'
 
 const roleOptions = Object.entries(ROLE_CONFIG).map(([value, config]) => ({
   value,
   label: config.label,
 }))
 
-export function UserActions({ user }: { user: User }) {
+export function UserActions({ user }: { user: UserWithAgency }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
 
