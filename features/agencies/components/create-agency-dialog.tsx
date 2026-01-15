@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition, useEffect } from 'react'
+import { useState, useTransition } from 'react'
 import { Plus, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -20,7 +20,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { createAgency } from '../actions'
-import { fetchCitiesByState, fetchDistrictsByCity } from '@/features/leads/actions'
+import {
+  fetchCitiesByState,
+  fetchDistrictsByCity,
+} from '@/features/leads/actions'
 import type { State, City, District } from '../types'
 
 type CreateAgencyDialogProps = {
@@ -31,7 +34,6 @@ export function CreateAgencyDialog({ states }: CreateAgencyDialogProps) {
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
 
-  // Location state
   const [selectedStateId, setSelectedStateId] = useState('')
   const [selectedCityId, setSelectedCityId] = useState('')
   const [selectedDistrictId, setSelectedDistrictId] = useState('')
@@ -40,36 +42,39 @@ export function CreateAgencyDialog({ states }: CreateAgencyDialogProps) {
   const [loadingCities, setLoadingCities] = useState(false)
   const [loadingDistricts, setLoadingDistricts] = useState(false)
 
-  // Load cities when state changes
-  useEffect(() => {
-    if (selectedStateId) {
-      setLoadingCities(true)
-      fetchCitiesByState(selectedStateId).then((data) => {
-        setCities(data)
-        setLoadingCities(false)
-        setSelectedCityId('')
-        setSelectedDistrictId('')
-        setDistricts([])
-      })
-    } else {
-      setCities([])
-      setDistricts([])
-    }
-  }, [selectedStateId])
+  const handleStateChange = async (stateId: string) => {
+    setSelectedStateId(stateId)
+    setSelectedCityId('')
+    setSelectedDistrictId('')
+    setDistricts([])
 
-  // Load districts when city changes
-  useEffect(() => {
-    if (selectedCityId) {
-      setLoadingDistricts(true)
-      fetchDistrictsByCity(selectedCityId).then((data) => {
-        setDistricts(data)
-        setLoadingDistricts(false)
-        setSelectedDistrictId('')
-      })
-    } else {
-      setDistricts([])
+    setLoadingCities(true)
+    try {
+      const data = await fetchCitiesByState(stateId)
+      setCities(data)
+    } catch (error) {
+      console.error(error)
+      setCities([])
+    } finally {
+      setLoadingCities(false)
     }
-  }, [selectedCityId])
+  }
+
+  const handleCityChange = async (cityId: string) => {
+    setSelectedCityId(cityId)
+    setSelectedDistrictId('')
+
+    setLoadingDistricts(true)
+    try {
+      const data = await fetchDistrictsByCity(cityId)
+      setDistricts(data)
+    } catch (error) {
+      console.error(error)
+      setDistricts([])
+    } finally {
+      setLoadingDistricts(false)
+    }
+  }
 
   function resetForm() {
     setSelectedStateId('')
@@ -101,10 +106,13 @@ export function CreateAgencyDialog({ states }: CreateAgencyDialogProps) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
-      setOpen(isOpen)
-      if (!isOpen) resetForm()
-    }}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen)
+        if (!isOpen) resetForm()
+      }}
+    >
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
@@ -128,10 +136,7 @@ export function CreateAgencyDialog({ states }: CreateAgencyDialogProps) {
 
           <div className="space-y-2">
             <Label htmlFor="stateId">Departamento</Label>
-            <Select
-              value={selectedStateId}
-              onValueChange={(value) => setSelectedStateId(value)}
-            >
+            <Select value={selectedStateId} onValueChange={handleStateChange}>
               <SelectTrigger id="stateId">
                 <SelectValue placeholder="Seleccionar departamento" />
               </SelectTrigger>
@@ -149,11 +154,15 @@ export function CreateAgencyDialog({ states }: CreateAgencyDialogProps) {
             <Label htmlFor="cityId">Provincia</Label>
             <Select
               value={selectedCityId}
-              onValueChange={(value) => setSelectedCityId(value)}
+              onValueChange={handleCityChange}
               disabled={!selectedStateId || loadingCities}
             >
               <SelectTrigger id="cityId">
-                <SelectValue placeholder={loadingCities ? 'Cargando...' : 'Seleccionar provincia'} />
+                <SelectValue
+                  placeholder={
+                    loadingCities ? 'Cargando...' : 'Seleccionar provincia'
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
                 {cities.map((city) => (
@@ -173,7 +182,11 @@ export function CreateAgencyDialog({ states }: CreateAgencyDialogProps) {
               disabled={!selectedCityId || loadingDistricts}
             >
               <SelectTrigger id="districtId">
-                <SelectValue placeholder={loadingDistricts ? 'Cargando...' : 'Seleccionar distrito'} />
+                <SelectValue
+                  placeholder={
+                    loadingDistricts ? 'Cargando...' : 'Seleccionar distrito'
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
                 {districts.map((district) => (
