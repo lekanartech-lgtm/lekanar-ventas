@@ -26,7 +26,6 @@ import {
   createStatusColumn,
   createDateColumn,
   createActionsColumn,
-  type BaseLead,
 } from './lead-columns'
 import type { Lead } from '../types'
 

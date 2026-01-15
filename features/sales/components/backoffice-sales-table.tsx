@@ -13,7 +13,13 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { ArrowUpDown, Search, MoreHorizontal, Eye, Pencil, MapPin } from 'lucide-react'
+import {
+  ArrowUpDown,
+  Search,
+  MoreHorizontal,
+  Pencil,
+  MapPin,
+} from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -54,9 +60,7 @@ const columns: ColumnDef<BackofficeSale>[] = [
       return (
         <div>
           <div className="font-medium">{sale.fullName}</div>
-          <div className="text-sm text-muted-foreground">
-            DNI: {sale.dni}
-          </div>
+          <div className="text-sm text-muted-foreground">DNI: {sale.dni}</div>
         </div>
       )
     },
@@ -104,12 +108,16 @@ const columns: ColumnDef<BackofficeSale>[] = [
   {
     accessorKey: 'requestStatus',
     header: 'Pedido',
-    cell: ({ row }) => <RequestStatusBadge status={row.getValue('requestStatus')} />,
+    cell: ({ row }) => (
+      <RequestStatusBadge status={row.getValue('requestStatus')} />
+    ),
   },
   {
     accessorKey: 'orderStatus',
     header: 'Orden',
-    cell: ({ row }) => <OrderStatusBadge status={row.getValue('orderStatus')} />,
+    cell: ({ row }) => (
+      <OrderStatusBadge status={row.getValue('orderStatus')} />
+    ),
   },
   {
     accessorKey: 'createdAt',
