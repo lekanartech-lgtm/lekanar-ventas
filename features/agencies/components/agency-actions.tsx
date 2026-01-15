@@ -26,7 +26,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toggleAgencyStatus, updateAgency } from '../actions'
-import { fetchCitiesByState, fetchDistrictsByCity } from '@/features/leads/actions'
+import {
+  fetchCitiesByState,
+  fetchDistrictsByCity,
+} from '@/features/leads/actions'
 import type { Agency, State, City, District } from '../types'
 
 type AgencyActionsProps = {
@@ -38,62 +41,92 @@ export function AgencyActions({ agency, states }: AgencyActionsProps) {
   const [isPending, startTransition] = useTransition()
   const [editOpen, setEditOpen] = useState(false)
 
-  // Location state
   const [selectedStateId, setSelectedStateId] = useState(agency.stateId || '')
   const [selectedCityId, setSelectedCityId] = useState(agency.cityId || '')
-  const [selectedDistrictId, setSelectedDistrictId] = useState(agency.districtId || '')
+  const [selectedDistrictId, setSelectedDistrictId] = useState(
+    agency.districtId || ''
+  )
   const [cities, setCities] = useState<City[]>([])
   const [districts, setDistricts] = useState<District[]>([])
   const [loadingCities, setLoadingCities] = useState(false)
   const [loadingDistricts, setLoadingDistricts] = useState(false)
   const [initialized, setInitialized] = useState(false)
 
-  // Load initial cities and districts when editing
   useEffect(() => {
-    if (editOpen && agency.stateId && !initialized) {
-      setLoadingCities(true)
-      fetchCitiesByState(agency.stateId).then((data) => {
-        setCities(data)
-        setLoadingCities(false)
-        if (agency.cityId) {
-          setLoadingDistricts(true)
-          fetchDistrictsByCity(agency.cityId).then((districtData) => {
-            setDistricts(districtData)
+    if (!editOpen || initialized) return
+
+    let cancelled = false
+
+    async function loadInitialData() {
+      if (agency.stateId) {
+        setLoadingCities(true)
+        try {
+          const citiesData = await fetchCitiesByState(agency.stateId)
+          if (!cancelled) setCities(citiesData)
+
+          if (agency.cityId) {
+            setLoadingDistricts(true)
+            const districtsData = await fetchDistrictsByCity(agency.cityId)
+            if (!cancelled) setDistricts(districtsData)
+          }
+        } catch (error) {
+          console.error(error)
+        } finally {
+          if (!cancelled) {
+            setLoadingCities(false)
             setLoadingDistricts(false)
             setInitialized(true)
-          })
-        } else {
-          setInitialized(true)
+          }
         }
-      })
+      } else {
+        setInitialized(true)
+      }
     }
-  }, [editOpen, agency.stateId, agency.cityId, initialized])
 
-  // Load cities when state changes (after initialization)
-  useEffect(() => {
-    if (initialized && selectedStateId && selectedStateId !== agency.stateId) {
-      setLoadingCities(true)
-      fetchCitiesByState(selectedStateId).then((data) => {
-        setCities(data)
-        setLoadingCities(false)
-        setSelectedCityId('')
-        setSelectedDistrictId('')
-        setDistricts([])
-      })
-    }
-  }, [selectedStateId, agency.stateId, initialized])
+    loadInitialData()
 
-  // Load districts when city changes (after initialization)
-  useEffect(() => {
-    if (initialized && selectedCityId && selectedCityId !== agency.cityId) {
-      setLoadingDistricts(true)
-      fetchDistrictsByCity(selectedCityId).then((data) => {
-        setDistricts(data)
-        setLoadingDistricts(false)
-        setSelectedDistrictId('')
-      })
+    return () => {
+      cancelled = true
     }
-  }, [selectedCityId, agency.cityId, initialized])
+  }, [editOpen, agency.id, agency.stateId, agency.cityId, initialized])
+
+  const handleStateChange = async (stateId: string) => {
+    setSelectedStateId(stateId)
+    if (stateId !== agency.stateId) {
+      setSelectedCityId('')
+      setSelectedDistrictId('')
+    }
+    setDistricts([])
+
+    setLoadingCities(true)
+    try {
+      const data = await fetchCitiesByState(stateId)
+      setCities(data)
+    } catch (error) {
+      console.error(error)
+      setCities([])
+    } finally {
+      setLoadingCities(false)
+    }
+  }
+
+  const handleCityChange = async (cityId: string) => {
+    setSelectedCityId(cityId)
+    if (cityId !== agency.cityId) {
+      setSelectedDistrictId('')
+    }
+
+    setLoadingDistricts(true)
+    try {
+      const data = await fetchDistrictsByCity(cityId)
+      setDistricts(data)
+    } catch (error) {
+      console.error(error)
+      setDistricts([])
+    } finally {
+      setLoadingDistricts(false)
+    }
+  }
 
   function handleToggleStatus() {
     startTransition(async () => {
@@ -164,10 +197,13 @@ export function AgencyActions({ agency, states }: AgencyActionsProps) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Dialog open={editOpen} onOpenChange={(isOpen) => {
-        setEditOpen(isOpen)
-        if (!isOpen) resetForm()
-      }}>
+      <Dialog
+        open={editOpen}
+        onOpenChange={(isOpen) => {
+          setEditOpen(isOpen)
+          if (!isOpen) resetForm()
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Editar agencia</DialogTitle>
@@ -185,16 +221,7 @@ export function AgencyActions({ agency, states }: AgencyActionsProps) {
 
             <div className="space-y-2">
               <Label htmlFor="edit-stateId">Departamento</Label>
-              <Select
-                value={selectedStateId}
-                onValueChange={(value) => {
-                  setSelectedStateId(value)
-                  if (value !== agency.stateId) {
-                    setSelectedCityId('')
-                    setSelectedDistrictId('')
-                  }
-                }}
-              >
+              <Select value={selectedStateId} onValueChange={handleStateChange}>
                 <SelectTrigger id="edit-stateId">
                   <SelectValue placeholder="Seleccionar departamento" />
                 </SelectTrigger>
@@ -212,16 +239,15 @@ export function AgencyActions({ agency, states }: AgencyActionsProps) {
               <Label htmlFor="edit-cityId">Provincia</Label>
               <Select
                 value={selectedCityId}
-                onValueChange={(value) => {
-                  setSelectedCityId(value)
-                  if (value !== agency.cityId) {
-                    setSelectedDistrictId('')
-                  }
-                }}
+                onValueChange={handleCityChange}
                 disabled={!selectedStateId || loadingCities}
               >
                 <SelectTrigger id="edit-cityId">
-                  <SelectValue placeholder={loadingCities ? 'Cargando...' : 'Seleccionar provincia'} />
+                  <SelectValue
+                    placeholder={
+                      loadingCities ? 'Cargando...' : 'Seleccionar provincia'
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {cities.map((city) => (
@@ -241,7 +267,11 @@ export function AgencyActions({ agency, states }: AgencyActionsProps) {
                 disabled={!selectedCityId || loadingDistricts}
               >
                 <SelectTrigger id="edit-districtId">
-                  <SelectValue placeholder={loadingDistricts ? 'Cargando...' : 'Seleccionar distrito'} />
+                  <SelectValue
+                    placeholder={
+                      loadingDistricts ? 'Cargando...' : 'Seleccionar distrito'
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {districts.map((district) => (
