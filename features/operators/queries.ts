@@ -35,3 +35,10 @@ export async function getOperatorByCode(code: string): Promise<Operator | null> 
   )
   return result.rows[0] ? mapRowToOperator(result.rows[0]) : null
 }
+
+export async function getAllOperators(): Promise<Operator[]> {
+  const result = await pool.query<OperatorRow>(
+    `SELECT * FROM operators ORDER BY name`
+  )
+  return result.rows.map(mapRowToOperator)
+}

@@ -17,3 +17,9 @@ export type OperatorRow = {
   created_at: Date
   updated_at: Date
 }
+
+export type OperatorFormData = {
+  name: string
+  code: string
+  logoUrl?: string
+}

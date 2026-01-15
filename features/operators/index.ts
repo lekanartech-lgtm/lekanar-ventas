@@ -1,3 +1,7 @@
 export * from './types'
 export * from './queries'
 export * from './constants'
+export * from './actions'
+export { OperatorsTable } from './components/operators-table'
+export { OperatorActions } from './components/operator-actions'
+export { CreateOperatorDialog } from './components/create-operator-dialog'
