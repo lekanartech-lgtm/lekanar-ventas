@@ -1,8 +1,12 @@
 import { UsersTable, CreateUserDialog, getUsersWithAgency } from '@/features/users'
+import { getAgencies } from '@/features/agencies'
 import { PageHeader } from '@/components/page-header'
 
 export default async function UsersPage() {
-  const users = await getUsersWithAgency()
+  const [users, agencies] = await Promise.all([
+    getUsersWithAgency(),
+    getAgencies(),
+  ])
 
   return (
     <div className="space-y-6">
@@ -13,7 +17,7 @@ export default async function UsersPage() {
         <CreateUserDialog />
       </PageHeader>
 
-      <UsersTable users={users} />
+      <UsersTable users={users} agencies={agencies} />
     </div>
   )
 }

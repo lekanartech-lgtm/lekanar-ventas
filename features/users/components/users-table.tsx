@@ -30,6 +30,7 @@ import { UserActions } from './user-actions'
 import { ROLE_CONFIG } from '../constants'
 import type { UserWithAgency } from '../types'
 import type { Role } from '@/features/auth/permissions'
+import type { Agency } from '@/features/agencies'
 
 function getInitials(name: string): string {
   return name
@@ -40,127 +41,138 @@ function getInitials(name: string): string {
     .slice(0, 2)
 }
 
-const columns: ColumnDef<UserWithAgency>[] = [
-  {
-    accessorKey: 'name',
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        className="-ml-4"
-        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-      >
-        Usuario
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => {
-      const user = row.original
-      return (
-        <div className="flex items-center gap-3">
-          <Avatar className="h-9 w-9">
-            <AvatarFallback className="bg-primary/10 text-primary text-xs">
-              {getInitials(user.name)}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <div className="font-medium">{user.name}</div>
-            <div className="text-sm text-muted-foreground">{user.email}</div>
+function createColumns(agencies: Agency[]): ColumnDef<UserWithAgency>[] {
+  return [
+    {
+      accessorKey: 'name',
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="-ml-4"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Usuario
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const user = row.original
+        return (
+          <div className="flex items-center gap-3">
+            <Avatar className="h-9 w-9">
+              <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                {getInitials(user.name)}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="font-medium">{user.name}</div>
+              <div className="text-sm text-muted-foreground">{user.email}</div>
+            </div>
           </div>
-        </div>
-      )
+        )
+      },
     },
-  },
-  {
-    accessorKey: 'role',
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        className="-ml-4"
-        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-      >
-        Rol
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => {
-      const role = (row.getValue('role') as Role) || 'asesor'
-      const config = ROLE_CONFIG[role]
-      return <Badge variant={config.variant}>{config.label}</Badge>
+    {
+      accessorKey: 'role',
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="-ml-4"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Rol
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const role = (row.getValue('role') as Role) || 'asesor'
+        const config = ROLE_CONFIG[role]
+        return <Badge variant={config.variant}>{config.label}</Badge>
+      },
     },
-  },
-  {
-    accessorKey: 'agencyName',
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        className="-ml-4"
-        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-      >
-        Agencia
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => {
-      const user = row.original
-      if (!user.agencyName) {
-        return <span className="text-muted-foreground">-</span>
-      }
-      return (
-        <div>
-          <div className="font-medium">{user.agencyName}</div>
-          <div className="text-sm text-muted-foreground">{user.agencyCity}</div>
-        </div>
-      )
+    {
+      accessorKey: 'agencyName',
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="-ml-4"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Agencia
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const user = row.original
+        if (!user.agencyName) {
+          return <span className="text-muted-foreground">-</span>
+        }
+        return (
+          <div>
+            <div className="font-medium">{user.agencyName}</div>
+            {user.agencyCity && (
+              <div className="text-sm text-muted-foreground">{user.agencyCity}</div>
+            )}
+          </div>
+        )
+      },
     },
-  },
-  {
-    accessorKey: 'banned',
-    header: 'Estado',
-    cell: ({ row }) => {
-      const banned = row.getValue('banned') as boolean
-      return banned ? (
-        <Badge variant="destructive">Suspendido</Badge>
-      ) : (
-        <Badge variant="outline" className="border-green-500 text-green-600">
-          Activo
-        </Badge>
-      )
+    {
+      accessorKey: 'banned',
+      header: 'Estado',
+      cell: ({ row }) => {
+        const banned = row.getValue('banned') as boolean
+        return banned ? (
+          <Badge variant="destructive">Suspendido</Badge>
+        ) : (
+          <Badge variant="outline" className="border-green-500 text-green-600">
+            Activo
+          </Badge>
+        )
+      },
     },
-  },
-  {
-    accessorKey: 'createdAt',
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        className="-ml-4"
-        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-      >
-        Fecha de registro
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => {
-      const date = row.getValue('createdAt') as Date
-      return (
-        <span className="text-muted-foreground">
-          {new Date(date).toLocaleDateString('es-ES', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-          })}
-        </span>
-      )
+    {
+      accessorKey: 'createdAt',
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="-ml-4"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Fecha de registro
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const date = row.getValue('createdAt') as Date
+        return (
+          <span className="text-muted-foreground">
+            {new Date(date).toLocaleDateString('es-ES', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+            })}
+          </span>
+        )
+      },
     },
-  },
-  {
-    id: 'actions',
-    cell: ({ row }) => <UserActions user={row.original} />,
-  },
-]
+    {
+      id: 'actions',
+      cell: ({ row }) => <UserActions user={row.original} agencies={agencies} />,
+    },
+  ]
+}
 
-export function UsersTable({ users }: { users: UserWithAgency[] }) {
+type UsersTableProps = {
+  users: UserWithAgency[]
+  agencies: Agency[]
+}
+
+export function UsersTable({ users, agencies }: UsersTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+
+  const columns = createColumns(agencies)
 
   const table = useReactTable({
     data: users,
@@ -203,7 +215,7 @@ export function UsersTable({ users }: { users: UserWithAgency[] }) {
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext(),
+                          header.getContext()
                         )}
                   </TableHead>
                 ))}
@@ -218,7 +230,7 @@ export function UsersTable({ users }: { users: UserWithAgency[] }) {
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext(),
+                        cell.getContext()
                       )}
                     </TableCell>
                   ))}
