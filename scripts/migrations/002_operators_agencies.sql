@@ -21,14 +21,16 @@ CREATE TABLE IF NOT EXISTS operators (
 -- AGENCIES TABLE
 -- ============================================
 
-CREATE TABLE IF NOT EXISTS agencies (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(100) NOT NULL UNIQUE,
-  city VARCHAR(100) NOT NULL,
-  address TEXT,
-  is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+create table agencies (
+    id uuid primary key default gen_random_uuid(),
+    name varchar(100) not null,
+    address varchar(100),
+    district_id char(6) references districts(id),
+    city_id char(4) references cities(id),
+    state_id char(2) references states(id),
+    country_id char(2) references countries(id),
+    is_active boolean default true,
+    created_at timestamptz default now()
 );
 
 -- ============================================
@@ -49,7 +51,7 @@ CREATE TABLE IF NOT EXISTS supervisor_advisors (
 -- ============================================
 
 -- Add agency_id to users
-ALTER TABLE "user" ADD COLUMN IF NOT EXISTS agency_id UUID REFERENCES agencies(id);
+ALTER TABLE "user" ADD COLUMN IF NOT EXISTS agency_id smallint REFERENCES agencies(id);
 
 -- Add operator_id to plans
 ALTER TABLE plans ADD COLUMN IF NOT EXISTS operator_id UUID REFERENCES operators(id);
