@@ -20,7 +20,6 @@ export type BaseLead = Lead & {
   userName?: string
 }
 
-// Column: Cliente (fullName + DNI)
 export function createClientColumn<T extends BaseLead>(): ColumnDef<T> {
   return {
     accessorKey: 'fullName',
@@ -50,7 +49,6 @@ export function createClientColumn<T extends BaseLead>(): ColumnDef<T> {
   }
 }
 
-// Column: Asesor (userName) - for admin view
 export function createAdvisorColumn<T extends BaseLead>(): ColumnDef<T> {
   return {
     accessorKey: 'userName',
@@ -71,7 +69,6 @@ export function createAdvisorColumn<T extends BaseLead>(): ColumnDef<T> {
   }
 }
 
-// Column: Teléfono
 export function createPhoneColumn<T extends BaseLead>(): ColumnDef<T> {
   return {
     accessorKey: 'phone',
@@ -91,7 +88,6 @@ export function createPhoneColumn<T extends BaseLead>(): ColumnDef<T> {
   }
 }
 
-// Column: Operador (target operator)
 export function createOperatorColumn<T extends BaseLead>(): ColumnDef<T> {
   return {
     accessorKey: 'operatorName',
@@ -103,7 +99,6 @@ export function createOperatorColumn<T extends BaseLead>(): ColumnDef<T> {
   }
 }
 
-// Column: ISP Actual (current operator)
 export function createCurrentOperatorColumn<
   T extends BaseLead,
 >(): ColumnDef<T> {
@@ -114,7 +109,6 @@ export function createCurrentOperatorColumn<
   }
 }
 
-// Column: Ubicación (district + city)
 export function createLocationColumn<T extends BaseLead>(): ColumnDef<T> {
   return {
     id: 'location',
@@ -139,7 +133,6 @@ export function createLocationColumn<T extends BaseLead>(): ColumnDef<T> {
   }
 }
 
-// Column: Estado
 export function createStatusColumn<T extends BaseLead>(): ColumnDef<T> {
   return {
     accessorKey: 'status',
@@ -148,7 +141,6 @@ export function createStatusColumn<T extends BaseLead>(): ColumnDef<T> {
   }
 }
 
-// Column: Fecha
 export function createDateColumn<T extends BaseLead>(options?: {
   showYear?: boolean
 }): ColumnDef<T> {
@@ -182,7 +174,6 @@ export function createDateColumn<T extends BaseLead>(options?: {
   }
 }
 
-// Column: Actions - generic wrapper
 export function createActionsColumn<T extends BaseLead>(
   renderActions: (lead: T) => React.ReactNode,
 ): ColumnDef<T> {
