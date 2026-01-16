@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { MoreHorizontal, Pencil, Loader2 } from 'lucide-react'
+import { MoreHorizontal, Pencil, Loader2, Key } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -31,7 +31,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { authClient } from '@/features/auth/client'
-import { updateUser } from '../actions'
+import { updateUser, adminUpdateUserPassword } from '../actions'
 import { ROLE_CONFIG } from '../constants'
 import type { UserWithAgency } from '../types'
 import type { Agency } from '@/features/agencies'
@@ -50,6 +50,8 @@ export function UserActions({ user, agencies }: UserActionsProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
+  const [passwordOpen, setPasswordOpen] = useState(false)
+  const [passwordError, setPasswordError] = useState('')
   const [isPending, startTransition] = useTransition()
   const [selectedAgencyId, setSelectedAgencyId] = useState(user.agencyId || '')
 
@@ -92,6 +94,29 @@ export function UserActions({ user, agencies }: UserActionsProps) {
     })
   }
 
+  async function handlePasswordSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setPasswordError('')
+    const formData = new FormData(e.currentTarget)
+    const newPassword = formData.get('newPassword') as string
+    const confirmPassword = formData.get('confirmPassword') as string
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError('Las contraseñas no coinciden')
+      return
+    }
+
+    startTransition(async () => {
+      const result = await adminUpdateUserPassword(user.id, newPassword)
+
+      if (result.error) {
+        setPasswordError(result.error)
+      } else if (result.success) {
+        setPasswordOpen(false)
+      }
+    })
+  }
+
   return (
     <>
       <DropdownMenu>
@@ -107,6 +132,11 @@ export function UserActions({ user, agencies }: UserActionsProps) {
           <DropdownMenuItem onClick={() => setEditOpen(true)}>
             <Pencil className="mr-2 h-4 w-4" />
             Editar usuario
+          </DropdownMenuItem>
+
+          <DropdownMenuItem onClick={() => setPasswordOpen(true)}>
+            <Key className="mr-2 h-4 w-4" />
+            Cambiar contraseña
           </DropdownMenuItem>
 
           <DropdownMenuSub>
@@ -192,6 +222,59 @@ export function UserActions({ user, agencies }: UserActionsProps) {
               <Button type="submit" disabled={isPending}>
                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Guardar
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={passwordOpen} onOpenChange={setPasswordOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cambiar contraseña</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handlePasswordSubmit} className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Establecer nueva contraseña para {user.name}
+            </p>
+
+            <div className="space-y-2">
+              <Label htmlFor="newPassword">Nueva contraseña *</Label>
+              <Input
+                id="newPassword"
+                name="newPassword"
+                type="password"
+                minLength={6}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirmar contraseña *</Label>
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                minLength={6}
+                required
+              />
+            </div>
+
+            {passwordError && (
+              <p className="text-sm text-destructive">{passwordError}</p>
+            )}
+
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setPasswordOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={isPending}>
+                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Cambiar contraseña
               </Button>
             </div>
           </form>
