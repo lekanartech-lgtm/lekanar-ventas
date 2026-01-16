@@ -1,7 +1,7 @@
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, ShoppingCart } from 'lucide-react'
 import { auth } from '@/features/auth/server'
 import {
   getLeadById,
@@ -35,16 +35,26 @@ export default async function EditLeadPage({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
-          <Link href="/dashboard/leads">
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-        </Button>
-        <div>
-          <h1 className="text-xl font-bold">Editar lead</h1>
-          <p className="text-sm text-muted-foreground">{lead.fullName}</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" asChild>
+            <Link href="/dashboard/leads">
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+          </Button>
+          <div>
+            <h1 className="text-xl font-bold">Editar lead</h1>
+            <p className="text-sm text-muted-foreground">{lead.fullName}</p>
+          </div>
         </div>
+        {lead.status === 'new' && (
+          <Button asChild>
+            <Link href={`/dashboard/sales/new?leadId=${lead.id}`}>
+              <ShoppingCart className="mr-2 h-4 w-4" />
+              Convertir a venta
+            </Link>
+          </Button>
+        )}
       </div>
 
       <LeadForm
