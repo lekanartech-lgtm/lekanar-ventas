@@ -10,9 +10,11 @@ import type { AgendaLead } from '../types'
 
 type OverdueAlertProps = {
   leads: AgendaLead[]
+  showAdvisor?: boolean
+  editBasePath?: string
 }
 
-export function OverdueAlert({ leads }: OverdueAlertProps) {
+export function OverdueAlert({ leads, showAdvisor = false, editBasePath }: OverdueAlertProps) {
   const [isExpanded, setIsExpanded] = useState(false)
 
   if (leads.length === 0) return null
@@ -54,7 +56,12 @@ export function OverdueAlert({ leads }: OverdueAlertProps) {
       {isExpanded && (
         <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
           {leads.map((lead) => (
-            <AgendaLeadCard key={lead.id} lead={lead} />
+            <AgendaLeadCard
+              key={lead.id}
+              lead={lead}
+              showAdvisor={showAdvisor}
+              editBasePath={editBasePath}
+            />
           ))}
         </div>
       )}

@@ -12,9 +12,16 @@ import type { AgendaLead } from '../types'
 type AgendaLeadCardProps = {
   lead: AgendaLead
   isCurrentSlot?: boolean
+  showAdvisor?: boolean
+  editBasePath?: string
 }
 
-export function AgendaLeadCard({ lead, isCurrentSlot }: AgendaLeadCardProps) {
+export function AgendaLeadCard({
+  lead,
+  isCurrentSlot,
+  showAdvisor = false,
+  editBasePath = '/dashboard/leads',
+}: AgendaLeadCardProps) {
   const urgencyConfig = URGENCY_CONFIG[lead.urgencyLevel]
   const whatsappUrl = `https://wa.me/51${lead.phone.replace(/\D/g, '')}`
 
@@ -53,9 +60,15 @@ export function AgendaLeadCard({ lead, isCurrentSlot }: AgendaLeadCardProps) {
                   </Badge>
                 )}
               </div>
-              {lead.operatorName && (
-                <p className="text-xs text-muted-foreground">{lead.operatorName}</p>
-              )}
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                {showAdvisor && lead.userName && (
+                  <span className="font-medium text-primary">{lead.userName}</span>
+                )}
+                {showAdvisor && lead.userName && lead.operatorName && (
+                  <span>•</span>
+                )}
+                {lead.operatorName && <span>{lead.operatorName}</span>}
+              </div>
             </div>
           </div>
         </div>
@@ -87,7 +100,7 @@ export function AgendaLeadCard({ lead, isCurrentSlot }: AgendaLeadCardProps) {
             </a>
           </Button>
           <Button size="sm" variant="outline" asChild>
-            <Link href={`/dashboard/leads/${lead.id}/edit`}>
+            <Link href={`${editBasePath}/${lead.id}/edit`}>
               <ChevronRight className="h-4 w-4" />
             </Link>
           </Button>

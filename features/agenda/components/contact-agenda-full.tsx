@@ -9,9 +9,15 @@ import type { AgendaData } from '../types'
 
 type ContactAgendaFullProps = {
   agenda: AgendaData
+  showAdvisor?: boolean
+  editBasePath?: string
 }
 
-export function ContactAgendaFull({ agenda }: ContactAgendaFullProps) {
+export function ContactAgendaFull({
+  agenda,
+  showAdvisor = false,
+  editBasePath = '/dashboard/leads',
+}: ContactAgendaFullProps) {
   const { currentSlot, timeRemaining } = useCurrentTimeSlot()
 
   const hasLeadsToday = agenda.totalCount > 0
@@ -34,7 +40,13 @@ export function ContactAgendaFull({ agenda }: ContactAgendaFullProps) {
         </p>
       )}
 
-      {agenda.overdue.length > 0 && <OverdueAlert leads={agenda.overdue} />}
+      {agenda.overdue.length > 0 && (
+        <OverdueAlert
+          leads={agenda.overdue}
+          showAdvisor={showAdvisor}
+          editBasePath={editBasePath}
+        />
+      )}
 
       {hasLeadsToday ? (
         <div className="space-y-4">
@@ -46,6 +58,8 @@ export function ContactAgendaFull({ agenda }: ContactAgendaFullProps) {
               isCurrentSlot={currentSlot === slot}
               timeRemaining={currentSlot === slot ? timeRemaining : undefined}
               defaultExpanded={true}
+              showAdvisor={showAdvisor}
+              editBasePath={editBasePath}
             />
           ))}
         </div>

@@ -12,9 +12,19 @@ import type { AgendaData, TimeSlot } from '../types'
 
 type ContactAgendaWidgetProps = {
   agenda: AgendaData
+  showAdvisor?: boolean
+  editBasePath?: string
+  agendaPath?: string
+  newLeadPath?: string
 }
 
-export function ContactAgendaWidget({ agenda }: ContactAgendaWidgetProps) {
+export function ContactAgendaWidget({
+  agenda,
+  showAdvisor = false,
+  editBasePath = '/dashboard/leads',
+  agendaPath = '/dashboard/agenda',
+  newLeadPath = '/dashboard/leads/new',
+}: ContactAgendaWidgetProps) {
   const { currentSlot, timeRemaining } = useCurrentTimeSlot()
 
   const hasLeadsToday = agenda.totalCount > 0
@@ -29,7 +39,7 @@ export function ContactAgendaWidget({ agenda }: ContactAgendaWidgetProps) {
             <CardTitle className="text-lg">Agenda de Hoy</CardTitle>
           </div>
           <Button variant="ghost" size="sm" asChild>
-            <Link href="/dashboard/agenda">
+            <Link href={agendaPath}>
               Ver todo
               <ChevronRight className="ml-1 h-4 w-4" />
             </Link>
@@ -52,7 +62,13 @@ export function ContactAgendaWidget({ agenda }: ContactAgendaWidgetProps) {
       </CardHeader>
 
       <CardContent className="space-y-3">
-        {agenda.overdue.length > 0 && <OverdueAlert leads={agenda.overdue} />}
+        {agenda.overdue.length > 0 && (
+          <OverdueAlert
+            leads={agenda.overdue}
+            showAdvisor={showAdvisor}
+            editBasePath={editBasePath}
+          />
+        )}
 
         {hasLeadsToday ? (
           <>
@@ -63,6 +79,8 @@ export function ContactAgendaWidget({ agenda }: ContactAgendaWidgetProps) {
                 leads={agenda.slots[slot]}
                 isCurrentSlot={currentSlot === slot}
                 timeRemaining={currentSlot === slot ? timeRemaining : undefined}
+                showAdvisor={showAdvisor}
+                editBasePath={editBasePath}
               />
             ))}
           </>
@@ -72,9 +90,11 @@ export function ContactAgendaWidget({ agenda }: ContactAgendaWidgetProps) {
             <p className="text-muted-foreground">
               No hay leads programados para hoy
             </p>
-            <Button variant="link" size="sm" asChild className="mt-2">
-              <Link href="/dashboard/leads/new">Agregar nuevo lead</Link>
-            </Button>
+            {newLeadPath && (
+              <Button variant="link" size="sm" asChild className="mt-2">
+                <Link href={newLeadPath}>Agregar nuevo lead</Link>
+              </Button>
+            )}
           </div>
         )}
       </CardContent>

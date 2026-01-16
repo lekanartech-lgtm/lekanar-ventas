@@ -10,6 +10,7 @@ import {
   LogOut,
   ChevronUp,
   FileUser,
+  Calendar,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -40,7 +41,10 @@ const navigation = [
   },
   {
     title: 'Gestión',
-    items: [{ title: 'Leads', href: '/admin/leads', icon: FileUser }],
+    items: [
+      { title: 'Agenda', href: '/admin/agenda', icon: Calendar },
+      { title: 'Leads', href: '/admin/leads', icon: FileUser },
+    ],
   },
   {
     title: 'Administración',

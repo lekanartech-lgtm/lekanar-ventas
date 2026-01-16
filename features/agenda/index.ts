@@ -1,6 +1,6 @@
 export type { TimeSlot, UrgencyLevel, AgendaLead, AgendaData } from './types'
 export { TIME_SLOT_CONFIG, TIME_SLOT_ORDER, URGENCY_CONFIG, getUrgencyLevel } from './constants'
-export { getAgendaByUserId, getAgendaByDate } from './queries'
+export { getAgendaByUserId, getAgendaByDate, getAgendaForAdmin } from './queries'
 export { useCurrentTimeSlot } from './hooks/use-current-time-slot'
 export { ContactAgendaWidget } from './components/contact-agenda-widget'
 export { ContactAgendaFull } from './components/contact-agenda-full'

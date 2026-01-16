@@ -21,6 +21,8 @@ type TimeSlotSectionProps = {
   isCurrentSlot: boolean
   timeRemaining?: string
   defaultExpanded?: boolean
+  showAdvisor?: boolean
+  editBasePath?: string
 }
 
 export function TimeSlotSection({
@@ -29,6 +31,8 @@ export function TimeSlotSection({
   isCurrentSlot,
   timeRemaining,
   defaultExpanded = false,
+  showAdvisor = false,
+  editBasePath,
 }: TimeSlotSectionProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded || isCurrentSlot)
   const config = TIME_SLOT_CONFIG[slot]
@@ -89,7 +93,13 @@ export function TimeSlotSection({
       {isExpanded && !isEmpty && (
         <div className="p-3 space-y-3 bg-background animate-in fade-in slide-in-from-top-2 duration-200">
           {leads.map((lead) => (
-            <AgendaLeadCard key={lead.id} lead={lead} isCurrentSlot={isCurrentSlot} />
+            <AgendaLeadCard
+              key={lead.id}
+              lead={lead}
+              isCurrentSlot={isCurrentSlot}
+              showAdvisor={showAdvisor}
+              editBasePath={editBasePath}
+            />
           ))}
         </div>
       )}

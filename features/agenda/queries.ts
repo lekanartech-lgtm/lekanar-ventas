@@ -1,7 +1,6 @@
 import { pool } from '@/lib/db'
-import type { Lead } from '@/features/leads'
 import type { AgendaLead, AgendaData, TimeSlot } from './types'
-import { getUrgencyLevel, TIME_SLOT_ORDER } from './constants'
+import { getUrgencyLevel } from './constants'
 
 type AgendaLeadRow = {
   id: string
@@ -16,6 +15,7 @@ type AgendaLeadRow = {
   notes: string | null
   status: 'new' | 'converted'
   user_id: string
+  user_name: string | null
   operator_id: string | null
   operator_name: string | null
   address: string | null
@@ -48,6 +48,7 @@ function mapRowToAgendaLead(row: AgendaLeadRow): AgendaLead {
     notes: row.notes,
     status: row.status,
     userId: row.user_id,
+    userName: row.user_name ?? undefined,
     operatorId: row.operator_id,
     operatorName: row.operator_name ?? undefined,
     address: row.address,
@@ -154,6 +155,64 @@ export async function getAgendaByDate(
       days_overdue DESC,
       l.contact_date ASC`,
     [userId, dateStr]
+  )
+
+  const leads = result.rows.map(mapRowToAgendaLead)
+
+  const overdue: AgendaLead[] = []
+  const slots: Record<TimeSlot, AgendaLead[]> = {
+    morning: [],
+    afternoon: [],
+    evening: [],
+    any: [],
+  }
+
+  for (const lead of leads) {
+    if (lead.isOverdue) {
+      overdue.push(lead)
+    } else {
+      const slot = (lead.contactTimePreference as TimeSlot) || 'any'
+      if (slots[slot]) {
+        slots[slot].push(lead)
+      } else {
+        slots.any.push(lead)
+      }
+    }
+  }
+
+  return {
+    overdue,
+    slots,
+    totalCount: leads.length,
+  }
+}
+
+export async function getAgendaForAdmin(): Promise<AgendaData> {
+  const result = await pool.query<AgendaLeadRow>(
+    `SELECT
+      l.*,
+      u.name as user_name,
+      rs.name as referral_source_name,
+      o.name as operator_name,
+      d.name as district_name,
+      c.name as city_name,
+      s.name as state_name,
+      (l.contact_date < CURRENT_DATE) as is_overdue,
+      GREATEST(0, CURRENT_DATE - l.contact_date)::int as days_overdue
+    FROM leads l
+    LEFT JOIN "user" u ON l.user_id = u.id
+    LEFT JOIN referral_sources rs ON l.referral_source_id = rs.id
+    LEFT JOIN operators o ON l.operator_id = o.id
+    LEFT JOIN districts d ON l.district_id = d.id
+    LEFT JOIN cities c ON d.city_id = c.id
+    LEFT JOIN states s ON c.state_id = s.id
+    WHERE l.status = 'new'
+      AND l.contact_date <= CURRENT_DATE
+    ORDER BY
+      is_overdue DESC,
+      days_overdue DESC,
+      l.contact_date ASC,
+      u.name ASC`
   )
 
   const leads = result.rows.map(mapRowToAgendaLead)
