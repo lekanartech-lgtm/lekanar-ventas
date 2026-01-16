@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Users, ShoppingCart, User, ClipboardCheck } from 'lucide-react'
+import { Home, Users, ShoppingCart, User, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const asesorNavItems = [
   { href: '/dashboard', icon: Home, label: 'Inicio' },
+  { href: '/dashboard/agenda', icon: Calendar, label: 'Agenda' },
   { href: '/dashboard/leads', icon: Users, label: 'Leads' },
   { href: '/dashboard/sales', icon: ShoppingCart, label: 'Ventas' },
   { href: '/dashboard/profile', icon: User, label: 'Perfil' },

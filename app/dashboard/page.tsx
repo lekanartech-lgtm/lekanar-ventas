@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { Users, ShoppingCart, Plus, TrendingUp } from 'lucide-react'
 import { auth } from '@/features/auth/server'
 import { getLeadsByUserId } from '@/features/leads'
+import { getAgendaByUserId, ContactAgendaWidget } from '@/features/agenda'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
@@ -11,7 +12,10 @@ export default async function HomePage() {
     headers: await headers(),
   })
 
-  const leads = await getLeadsByUserId(session!.user.id)
+  const [leads, agenda] = await Promise.all([
+    getLeadsByUserId(session!.user.id),
+    getAgendaByUserId(session!.user.id),
+  ])
   const newLeads = leads.filter((l) => l.status === 'new')
   const convertedLeads = leads.filter((l) => l.status === 'converted')
 
@@ -61,6 +65,8 @@ export default async function HomePage() {
           </Link>
         ))}
       </div>
+
+      <ContactAgendaWidget agenda={agenda} />
 
       <Card>
         <CardHeader className="pb-3">
