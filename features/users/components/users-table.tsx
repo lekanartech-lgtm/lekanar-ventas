@@ -111,7 +111,9 @@ function createColumns(agencies: Agency[]): ColumnDef<UserWithAgency>[] {
           <div>
             <div className="font-medium">{user.agencyName}</div>
             {user.agencyCity && (
-              <div className="text-sm text-muted-foreground">{user.agencyCity}</div>
+              <div className="text-sm text-muted-foreground">
+                {user.agencyCity}
+              </div>
             )}
           </div>
         )
@@ -158,7 +160,9 @@ function createColumns(agencies: Agency[]): ColumnDef<UserWithAgency>[] {
     },
     {
       id: 'actions',
-      cell: ({ row }) => <UserActions user={row.original} agencies={agencies} />,
+      cell: ({ row }) => (
+        <UserActions user={row.original} agencies={agencies} />
+      ),
     },
   ]
 }
@@ -215,7 +219,7 @@ export function UsersTable({ users, agencies }: UsersTableProps) {
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
                 ))}
@@ -230,7 +234,7 @@ export function UsersTable({ users, agencies }: UsersTableProps) {
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}

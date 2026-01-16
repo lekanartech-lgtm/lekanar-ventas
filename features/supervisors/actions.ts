@@ -17,7 +17,7 @@ export async function assignAdvisorToSupervisor(advisorId: string) {
       `INSERT INTO supervisor_advisors (supervisor_id, advisor_id)
        VALUES ($1, $2)
        ON CONFLICT (supervisor_id, advisor_id) DO NOTHING`,
-      [session.user.id, advisorId]
+      [session.user.id, advisorId],
     )
 
     revalidatePath('/dashboard/supervisor')
@@ -40,7 +40,7 @@ export async function removeAdvisorFromSupervisor(advisorId: string) {
     await pool.query(
       `DELETE FROM supervisor_advisors
        WHERE supervisor_id = $1 AND advisor_id = $2`,
-      [session.user.id, advisorId]
+      [session.user.id, advisorId],
     )
 
     revalidatePath('/dashboard/supervisor')
@@ -53,7 +53,10 @@ export async function removeAdvisorFromSupervisor(advisorId: string) {
 }
 
 // Admin action to assign advisors to any supervisor
-export async function adminAssignAdvisor(supervisorId: string, advisorId: string) {
+export async function adminAssignAdvisor(
+  supervisorId: string,
+  advisorId: string,
+) {
   const session = await auth.api.getSession({ headers: await headers() })
 
   if (!session || session.user.role !== 'admin') {
@@ -65,7 +68,7 @@ export async function adminAssignAdvisor(supervisorId: string, advisorId: string
       `INSERT INTO supervisor_advisors (supervisor_id, advisor_id)
        VALUES ($1, $2)
        ON CONFLICT (supervisor_id, advisor_id) DO NOTHING`,
-      [supervisorId, advisorId]
+      [supervisorId, advisorId],
     )
 
     revalidatePath('/admin/assignments')
@@ -76,7 +79,10 @@ export async function adminAssignAdvisor(supervisorId: string, advisorId: string
   }
 }
 
-export async function adminRemoveAdvisor(supervisorId: string, advisorId: string) {
+export async function adminRemoveAdvisor(
+  supervisorId: string,
+  advisorId: string,
+) {
   const session = await auth.api.getSession({ headers: await headers() })
 
   if (!session || session.user.role !== 'admin') {
@@ -87,7 +93,7 @@ export async function adminRemoveAdvisor(supervisorId: string, advisorId: string
     await pool.query(
       `DELETE FROM supervisor_advisors
        WHERE supervisor_id = $1 AND advisor_id = $2`,
-      [supervisorId, advisorId]
+      [supervisorId, advisorId],
     )
 
     revalidatePath('/admin/assignments')

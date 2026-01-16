@@ -1,5 +1,15 @@
-export type RequestStatus = 'pending' | 'validated' | 'cancelled' | 'rejected' | 'rescue'
-export type OrderStatus = 'pending' | 'scheduled' | 'executed' | 'rescue' | 'cancelled'
+export type RequestStatus =
+  | 'pending'
+  | 'validated'
+  | 'cancelled'
+  | 'rejected'
+  | 'rescue'
+export type OrderStatus =
+  | 'pending'
+  | 'scheduled'
+  | 'executed'
+  | 'rescue'
+  | 'cancelled'
 export type AddressType = 'home' | 'multifamily' | 'condo'
 
 export type Sale = {

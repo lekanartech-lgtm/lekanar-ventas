@@ -25,7 +25,7 @@ export async function createAgency(data: AgencyFormData) {
         data.cityId || null,
         data.stateId || null,
         data.countryId || null,
-      ]
+      ],
     )
 
     revalidatePath('/admin/settings')
@@ -56,7 +56,7 @@ export async function updateAgency(agencyId: string, data: AgencyFormData) {
         data.stateId || null,
         data.countryId || null,
         agencyId,
-      ]
+      ],
     )
 
     revalidatePath('/admin/settings')
@@ -75,10 +75,10 @@ export async function toggleAgencyStatus(agencyId: string, isActive: boolean) {
   }
 
   try {
-    await pool.query(
-      `UPDATE agencies SET is_active = $1 WHERE id = $2`,
-      [isActive, agencyId]
-    )
+    await pool.query(`UPDATE agencies SET is_active = $1 WHERE id = $2`, [
+      isActive,
+      agencyId,
+    ])
 
     revalidatePath('/admin/settings')
     return { success: true }

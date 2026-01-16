@@ -17,7 +17,7 @@ export async function createOperator(data: OperatorFormData) {
     // Check if code already exists
     const existing = await pool.query(
       'SELECT id FROM operators WHERE code = $1',
-      [data.code.toUpperCase()]
+      [data.code.toUpperCase()],
     )
 
     if (existing.rows.length > 0) {
@@ -28,7 +28,7 @@ export async function createOperator(data: OperatorFormData) {
       `INSERT INTO operators (name, code, logo_url)
        VALUES ($1, $2, $3)
        RETURNING id`,
-      [data.name, data.code.toUpperCase(), data.logoUrl || null]
+      [data.name, data.code.toUpperCase(), data.logoUrl || null],
     )
 
     revalidatePath('/admin/settings')
@@ -39,7 +39,10 @@ export async function createOperator(data: OperatorFormData) {
   }
 }
 
-export async function updateOperator(operatorId: string, data: OperatorFormData) {
+export async function updateOperator(
+  operatorId: string,
+  data: OperatorFormData,
+) {
   const session = await auth.api.getSession({ headers: await headers() })
 
   if (!session || session.user.role !== 'admin') {
@@ -50,7 +53,7 @@ export async function updateOperator(operatorId: string, data: OperatorFormData)
     // Check if code already exists for another operator
     const existing = await pool.query(
       'SELECT id FROM operators WHERE code = $1 AND id != $2',
-      [data.code.toUpperCase(), operatorId]
+      [data.code.toUpperCase(), operatorId],
     )
 
     if (existing.rows.length > 0) {
@@ -61,7 +64,7 @@ export async function updateOperator(operatorId: string, data: OperatorFormData)
       `UPDATE operators
        SET name = $1, code = $2, logo_url = $3, updated_at = NOW()
        WHERE id = $4`,
-      [data.name, data.code.toUpperCase(), data.logoUrl || null, operatorId]
+      [data.name, data.code.toUpperCase(), data.logoUrl || null, operatorId],
     )
 
     revalidatePath('/admin/settings')
@@ -72,7 +75,10 @@ export async function updateOperator(operatorId: string, data: OperatorFormData)
   }
 }
 
-export async function toggleOperatorStatus(operatorId: string, isActive: boolean) {
+export async function toggleOperatorStatus(
+  operatorId: string,
+  isActive: boolean,
+) {
   const session = await auth.api.getSession({ headers: await headers() })
 
   if (!session || session.user.role !== 'admin') {
@@ -82,7 +88,7 @@ export async function toggleOperatorStatus(operatorId: string, isActive: boolean
   try {
     await pool.query(
       `UPDATE operators SET is_active = $1, updated_at = NOW() WHERE id = $2`,
-      [isActive, operatorId]
+      [isActive, operatorId],
     )
 
     revalidatePath('/admin/settings')

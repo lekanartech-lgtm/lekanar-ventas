@@ -54,7 +54,9 @@ export default async function BackofficeSaleDetailPage({
             <User className="h-5 w-5 text-muted-foreground" />
             <div>
               <p className="text-sm text-muted-foreground">Registrado por</p>
-              <p className="font-medium">{sale.userName || 'Usuario desconocido'}</p>
+              <p className="font-medium">
+                {sale.userName || 'Usuario desconocido'}
+              </p>
             </div>
           </div>
         </CardContent>
@@ -178,7 +180,9 @@ export default async function BackofficeSaleDetailPage({
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           <p>
-            <span className="text-muted-foreground">Fecha vencimiento DNI:</span>{' '}
+            <span className="text-muted-foreground">
+              Fecha vencimiento DNI:
+            </span>{' '}
             {new Date(sale.dniExpiryDate).toLocaleDateString('es-PE')}
           </p>
           {sale.birthDate && (
@@ -195,7 +199,9 @@ export default async function BackofficeSaleDetailPage({
           )}
           {sale.phoneOwnerName && (
             <p>
-              <span className="text-muted-foreground">Titular del teléfono:</span>{' '}
+              <span className="text-muted-foreground">
+                Titular del teléfono:
+              </span>{' '}
               {sale.phoneOwnerName} (DNI: {sale.phoneOwnerDni})
             </p>
           )}

@@ -57,7 +57,7 @@ export function BottomNav({ role }: BottomNavProps) {
                   'flex flex-col items-center gap-1 py-3 px-4 text-xs transition-colors',
                   isActive
                     ? 'text-primary'
-                    : 'text-muted-foreground hover:text-foreground'
+                    : 'text-muted-foreground hover:text-foreground',
                 )}
               >
                 <item.icon className="h-5 w-5" />

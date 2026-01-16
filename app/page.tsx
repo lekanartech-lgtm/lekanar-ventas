@@ -31,9 +31,7 @@ export default async function Home() {
             WIN
           </div>
           <CardTitle className="text-2xl">WIN Sales</CardTitle>
-          <CardDescription>
-            Sistema de gestión comercial
-          </CardDescription>
+          <CardDescription>Sistema de gestión comercial</CardDescription>
         </CardHeader>
         <CardContent>
           <Button asChild className="w-full">

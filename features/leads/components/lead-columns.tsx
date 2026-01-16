@@ -101,7 +101,9 @@ export function createOperatorColumn<T extends BaseLead>(): ColumnDef<T> {
 }
 
 // Column: ISP Actual (current operator)
-export function createCurrentOperatorColumn<T extends BaseLead>(): ColumnDef<T> {
+export function createCurrentOperatorColumn<
+  T extends BaseLead,
+>(): ColumnDef<T> {
   return {
     accessorKey: 'currentOperator',
     header: 'ISP Actual',
@@ -179,7 +181,7 @@ export function createDateColumn<T extends BaseLead>(options?: {
 
 // Column: Actions - generic wrapper
 export function createActionsColumn<T extends BaseLead>(
-  renderActions: (lead: T) => React.ReactNode
+  renderActions: (lead: T) => React.ReactNode,
 ): ColumnDef<T> {
   return {
     id: 'actions',

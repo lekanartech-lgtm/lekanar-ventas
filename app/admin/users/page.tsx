@@ -1,4 +1,8 @@
-import { UsersTable, CreateUserDialog, getUsersWithAgency } from '@/features/users'
+import {
+  UsersTable,
+  CreateUserDialog,
+  getUsersWithAgency,
+} from '@/features/users'
 import { getAgencies } from '@/features/agencies'
 import { PageHeader } from '@/components/page-header'
 

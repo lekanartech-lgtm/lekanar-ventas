@@ -28,7 +28,7 @@ export async function getUsersWithAgency(): Promise<UserWithAgency[]> {
     FROM "user" u
     LEFT JOIN agencies a ON u.agency_id = a.id
     LEFT JOIN cities c ON a.city_id = c.id
-    ORDER BY u."createdAt" DESC`
+    ORDER BY u."createdAt" DESC`,
   )
 
   return result.rows.map((row) => ({
@@ -44,7 +44,9 @@ export async function getUsersWithAgency(): Promise<UserWithAgency[]> {
   }))
 }
 
-export async function getUsersByAgency(agencyId: string): Promise<UserWithAgency[]> {
+export async function getUsersByAgency(
+  agencyId: string,
+): Promise<UserWithAgency[]> {
   const result = await pool.query<UserRow>(
     `SELECT
       u.id,
@@ -61,7 +63,7 @@ export async function getUsersByAgency(agencyId: string): Promise<UserWithAgency
     LEFT JOIN cities c ON a.city_id = c.id
     WHERE u.agency_id = $1
     ORDER BY u.name`,
-    [agencyId]
+    [agencyId],
   )
 
   return result.rows.map((row) => ({
@@ -93,7 +95,7 @@ export async function getAdvisors(): Promise<UserWithAgency[]> {
     LEFT JOIN agencies a ON u.agency_id = a.id
     LEFT JOIN cities c ON a.city_id = c.id
     WHERE u.role = 'asesor' AND (u.banned IS NULL OR u.banned = false)
-    ORDER BY a.name, u.name`
+    ORDER BY a.name, u.name`,
   )
 
   return result.rows.map((row) => ({

@@ -52,13 +52,13 @@ export function LeadForm({
   const [error, setError] = useState('')
 
   const [selectedStateId, setSelectedStateId] = useState(
-    lead?.districtId?.slice(0, 2) || ''
+    lead?.districtId?.slice(0, 2) || '',
   )
   const [selectedCityId, setSelectedCityId] = useState(
-    lead?.districtId?.slice(0, 4) || ''
+    lead?.districtId?.slice(0, 4) || '',
   )
   const [selectedDistrictId, setSelectedDistrictId] = useState(
-    lead?.districtId || ''
+    lead?.districtId || '',
   )
   const [cities, setCities] = useState<City[]>([])
   const [districts, setDistricts] = useState<District[]>([])
@@ -163,7 +163,7 @@ export function LeadForm({
         setError('No se pudo obtener la ubicación: ' + err.message)
         setGettingLocation(false)
       },
-      { enableHighAccuracy: true }
+      { enableHighAccuracy: true },
     )
   }
 

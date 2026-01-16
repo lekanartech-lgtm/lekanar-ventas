@@ -122,7 +122,9 @@ function createColumns(states: State[]): ColumnDef<Agency>[] {
     },
     {
       id: 'actions',
-      cell: ({ row }) => <AgencyActions agency={row.original} states={states} />,
+      cell: ({ row }) => (
+        <AgencyActions agency={row.original} states={states} />
+      ),
     },
   ]
 }
@@ -179,7 +181,7 @@ export function AgenciesTable({ agencies, states }: AgenciesTableProps) {
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
                 ))}
@@ -194,7 +196,7 @@ export function AgenciesTable({ agencies, states }: AgenciesTableProps) {
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}

@@ -50,14 +50,13 @@ export async function createSale(data: SaleFormData) {
         data.installationDate || null,
         session.user.id,
         data.operatorId || null,
-      ]
+      ],
     )
 
     if (data.leadId) {
-      await pool.query(
-        `UPDATE leads SET status = 'converted' WHERE id = $1`,
-        [data.leadId]
-      )
+      await pool.query(`UPDATE leads SET status = 'converted' WHERE id = $1`, [
+        data.leadId,
+      ])
       revalidatePath('/dashboard/leads')
     }
 
@@ -79,7 +78,7 @@ export async function updateSale(id: string, data: Partial<SaleFormData>) {
   try {
     const existing = await pool.query(
       'SELECT user_id FROM sales WHERE id = $1',
-      [id]
+      [id],
     )
 
     if (existing.rows.length === 0) {
@@ -120,7 +119,7 @@ export async function updateSale(id: string, data: Partial<SaleFormData>) {
       const value = data[key as keyof SaleFormData]
       if (value !== undefined) {
         fields.push(`${dbField} = $${paramIndex++}`)
-        values.push(value === '' ? null : value as string | number | null)
+        values.push(value === '' ? null : (value as string | number | null))
       }
     }
 
@@ -145,7 +144,7 @@ export async function updateSale(id: string, data: Partial<SaleFormData>) {
 
     await pool.query(
       `UPDATE sales SET ${fields.join(', ')} WHERE id = $${paramIndex}`,
-      values
+      values,
     )
 
     revalidatePath('/dashboard/sales')
@@ -168,7 +167,10 @@ export type BackofficeUpdateData = {
   operatorMetadata?: Record<string, unknown>
 }
 
-export async function backofficeUpdateSale(id: string, data: BackofficeUpdateData) {
+export async function backofficeUpdateSale(
+  id: string,
+  data: BackofficeUpdateData,
+) {
   const session = await auth.api.getSession({ headers: await headers() })
 
   if (!session || !['backoffice', 'admin'].includes(session.user.role || '')) {
@@ -221,7 +223,7 @@ export async function backofficeUpdateSale(id: string, data: BackofficeUpdateDat
 
     await pool.query(
       `UPDATE sales SET ${fields.join(', ')} WHERE id = $${paramIndex}`,
-      values
+      values,
     )
 
     revalidatePath('/dashboard/backoffice')

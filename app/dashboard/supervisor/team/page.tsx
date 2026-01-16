@@ -51,7 +51,9 @@ export default async function SupervisorTeamPage() {
                   </div>
                   <div className="flex-1">
                     <p className="font-medium">{member.name}</p>
-                    <p className="text-sm text-muted-foreground">{member.email}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {member.email}
+                    </p>
                   </div>
                   {member.agencyName && (
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">

@@ -25,10 +25,10 @@ export function LeadCreationWizard({
   const autoSelectedOperator = operators.length === 1 ? operators[0] : null
 
   const [step, setStep] = useState<Step>(
-    autoSelectedOperator ? 'form' : 'selection'
+    autoSelectedOperator ? 'form' : 'selection',
   )
   const [selectedOperatorId, setSelectedOperatorId] = useState<string>(
-    autoSelectedOperator?.id ?? ''
+    autoSelectedOperator?.id ?? '',
   )
 
   const handleOperatorSelect = (operatorId: string) => {
@@ -63,7 +63,7 @@ export function LeadCreationWizard({
                 'cursor-pointer transition-all w-64 hover:shadow-md hover:border-primary group',
                 operator.isActive
                   ? 'opacity-100'
-                  : 'opacity-50 pointer-events-none'
+                  : 'opacity-50 pointer-events-none',
               )}
               onClick={() => handleOperatorSelect(operator.id)}
             >

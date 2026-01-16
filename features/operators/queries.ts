@@ -15,7 +15,7 @@ function mapRowToOperator(row: OperatorRow): Operator {
 
 export async function getOperators(): Promise<Operator[]> {
   const result = await pool.query<OperatorRow>(
-    `SELECT * FROM operators WHERE is_active = true ORDER BY name`
+    `SELECT * FROM operators WHERE is_active = true ORDER BY name`,
   )
   return result.rows.map(mapRowToOperator)
 }
@@ -23,22 +23,24 @@ export async function getOperators(): Promise<Operator[]> {
 export async function getOperatorById(id: string): Promise<Operator | null> {
   const result = await pool.query<OperatorRow>(
     `SELECT * FROM operators WHERE id = $1`,
-    [id]
+    [id],
   )
   return result.rows[0] ? mapRowToOperator(result.rows[0]) : null
 }
 
-export async function getOperatorByCode(code: string): Promise<Operator | null> {
+export async function getOperatorByCode(
+  code: string,
+): Promise<Operator | null> {
   const result = await pool.query<OperatorRow>(
     `SELECT * FROM operators WHERE code = $1`,
-    [code]
+    [code],
   )
   return result.rows[0] ? mapRowToOperator(result.rows[0]) : null
 }
 
 export async function getAllOperators(): Promise<Operator[]> {
   const result = await pool.query<OperatorRow>(
-    `SELECT * FROM operators ORDER BY name`
+    `SELECT * FROM operators ORDER BY name`,
   )
   return result.rows.map(mapRowToOperator)
 }

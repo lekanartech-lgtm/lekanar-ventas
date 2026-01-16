@@ -33,7 +33,7 @@ export async function getAgencies(): Promise<Agency[]> {
     LEFT JOIN states s ON a.state_id = s.id
     LEFT JOIN countries co ON a.country_id = co.id
     WHERE a.is_active = true
-    ORDER BY a.name`
+    ORDER BY a.name`,
   )
   return result.rows.map(mapRowToAgency)
 }
@@ -51,7 +51,7 @@ export async function getAllAgencies(): Promise<Agency[]> {
     LEFT JOIN cities c ON a.city_id = c.id
     LEFT JOIN states s ON a.state_id = s.id
     LEFT JOIN countries co ON a.country_id = co.id
-    ORDER BY a.name`
+    ORDER BY a.name`,
   )
   return result.rows.map(mapRowToAgency)
 }
@@ -70,7 +70,7 @@ export async function getAgencyById(id: string): Promise<Agency | null> {
     LEFT JOIN states s ON a.state_id = s.id
     LEFT JOIN countries co ON a.country_id = co.id
     WHERE a.id = $1`,
-    [id]
+    [id],
   )
   return result.rows[0] ? mapRowToAgency(result.rows[0]) : null
 }

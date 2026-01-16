@@ -44,7 +44,7 @@ export function AgencyActions({ agency, states }: AgencyActionsProps) {
   const [selectedStateId, setSelectedStateId] = useState(agency.stateId || '')
   const [selectedCityId, setSelectedCityId] = useState(agency.cityId || '')
   const [selectedDistrictId, setSelectedDistrictId] = useState(
-    agency.districtId || ''
+    agency.districtId || '',
   )
   const [cities, setCities] = useState<City[]>([])
   const [districts, setDistricts] = useState<District[]>([])

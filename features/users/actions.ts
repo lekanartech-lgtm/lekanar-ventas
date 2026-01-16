@@ -23,7 +23,7 @@ export async function updateUser(userId: string, data: UpdateUserData) {
       `UPDATE "user"
        SET name = $1, email = $2, agency_id = $3, "updatedAt" = NOW()
        WHERE id = $4`,
-      [data.name, data.email, data.agencyId || null, userId]
+      [data.name, data.email, data.agencyId || null, userId],
     )
 
     revalidatePath('/admin/users')

@@ -1,5 +1,12 @@
 import { pool } from '@/lib/db'
-import type { Sale, Plan, DocumentType, RequestStatus, OrderStatus, AddressType } from './types'
+import type {
+  Sale,
+  Plan,
+  DocumentType,
+  RequestStatus,
+  OrderStatus,
+  AddressType,
+} from './types'
 
 type SaleRow = {
   id: string
@@ -94,12 +101,15 @@ export async function getSalesByUserId(userId: string): Promise<Sale[]> {
     LEFT JOIN operators o ON s.operator_id = o.id
     WHERE s.user_id = $1
     ORDER BY s.created_at DESC`,
-    [userId]
+    [userId],
   )
   return result.rows.map(mapRowToSale)
 }
 
-export async function getSaleById(id: string, userId: string): Promise<Sale | null> {
+export async function getSaleById(
+  id: string,
+  userId: string,
+): Promise<Sale | null> {
   const result = await pool.query<SaleRow>(
     `SELECT
       s.*,
@@ -109,12 +119,14 @@ export async function getSaleById(id: string, userId: string): Promise<Sale | nu
     JOIN plans p ON s.plan_id = p.id
     LEFT JOIN operators o ON s.operator_id = o.id
     WHERE s.id = $1 AND s.user_id = $2`,
-    [id, userId]
+    [id, userId],
   )
   return result.rows[0] ? mapRowToSale(result.rows[0]) : null
 }
 
-export async function getSalesBySupervisor(supervisorId: string): Promise<Sale[]> {
+export async function getSalesBySupervisor(
+  supervisorId: string,
+): Promise<Sale[]> {
   const result = await pool.query<SaleRow>(
     `SELECT
       s.*,
@@ -126,7 +138,7 @@ export async function getSalesBySupervisor(supervisorId: string): Promise<Sale[]
     JOIN supervisor_advisors sa ON s.user_id = sa.advisor_id
     WHERE sa.supervisor_id = $1
     ORDER BY s.created_at DESC`,
-    [supervisorId]
+    [supervisorId],
   )
   return result.rows.map(mapRowToSale)
 }
@@ -142,7 +154,7 @@ export async function getAllSales(): Promise<Sale[]> {
     JOIN plans p ON s.plan_id = p.id
     LEFT JOIN operators o ON s.operator_id = o.id
     LEFT JOIN "user" u ON s.user_id = u.id
-    ORDER BY s.created_at DESC`
+    ORDER BY s.created_at DESC`,
   )
   return result.rows.map((row) => ({
     ...mapRowToSale(row),
@@ -188,12 +200,14 @@ export async function getPlansByOperator(operatorId: string): Promise<Plan[]> {
     is_active: boolean
     operator_id: string | null
     operator_name: string | null
-  }>(`SELECT p.*, o.name as operator_name
+  }>(
+    `SELECT p.*, o.name as operator_name
       FROM plans p
       LEFT JOIN operators o ON p.operator_id = o.id
       WHERE p.is_active = true AND p.operator_id = $1
       ORDER BY p.price`,
-    [operatorId])
+    [operatorId],
+  )
 
   return result.rows.map((row) => ({
     id: row.id,
@@ -207,7 +221,9 @@ export async function getPlansByOperator(operatorId: string): Promise<Plan[]> {
   }))
 }
 
-export async function getSaleByIdForBackoffice(id: string): Promise<(Sale & { userName?: string }) | null> {
+export async function getSaleByIdForBackoffice(
+  id: string,
+): Promise<(Sale & { userName?: string }) | null> {
   const result = await pool.query<SaleRow & { user_name: string }>(
     `SELECT
       s.*,
@@ -219,7 +235,7 @@ export async function getSaleByIdForBackoffice(id: string): Promise<(Sale & { us
     LEFT JOIN operators o ON s.operator_id = o.id
     LEFT JOIN "user" u ON s.user_id = u.id
     WHERE s.id = $1`,
-    [id]
+    [id],
   )
   if (!result.rows[0]) return null
   return {
@@ -228,7 +244,9 @@ export async function getSaleByIdForBackoffice(id: string): Promise<(Sale & { us
   }
 }
 
-export async function getDocumentTypesByOperator(operatorId: string): Promise<DocumentType[]> {
+export async function getDocumentTypesByOperator(
+  operatorId: string,
+): Promise<DocumentType[]> {
   const result = await pool.query<{
     id: string
     operator_id: string | null
@@ -242,7 +260,7 @@ export async function getDocumentTypesByOperator(operatorId: string): Promise<Do
     `SELECT * FROM document_types
      WHERE operator_id = $1 AND is_active = true
      ORDER BY display_order`,
-    [operatorId]
+    [operatorId],
   )
 
   return result.rows.map((row) => ({

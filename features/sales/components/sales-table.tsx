@@ -82,12 +82,16 @@ const columns: ColumnDef<Sale>[] = [
   {
     accessorKey: 'requestStatus',
     header: 'Pedido',
-    cell: ({ row }) => <RequestStatusBadge status={row.getValue('requestStatus')} />,
+    cell: ({ row }) => (
+      <RequestStatusBadge status={row.getValue('requestStatus')} />
+    ),
   },
   {
     accessorKey: 'orderStatus',
     header: 'Orden',
-    cell: ({ row }) => <OrderStatusBadge status={row.getValue('orderStatus')} />,
+    cell: ({ row }) => (
+      <OrderStatusBadge status={row.getValue('orderStatus')} />
+    ),
   },
   {
     accessorKey: 'createdAt',
@@ -203,7 +207,7 @@ export function SalesTable({ sales }: { sales: Sale[] }) {
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   ))}
@@ -218,7 +222,7 @@ export function SalesTable({ sales }: { sales: Sale[] }) {
                       <TableCell key={cell.id}>
                         {flexRender(
                           cell.column.columnDef.cell,
-                          cell.getContext()
+                          cell.getContext(),
                         )}
                       </TableCell>
                     ))}
@@ -297,7 +301,9 @@ export function SalesCardList({ sales }: { sales: Sale[] }) {
                 </div>
                 <div className="flex flex-col items-end gap-1">
                   {sale.operatorName && (
-                    <span className="text-xs font-medium text-primary">{sale.operatorName}</span>
+                    <span className="text-xs font-medium text-primary">
+                      {sale.operatorName}
+                    </span>
                   )}
                   <RequestStatusBadge status={sale.requestStatus} />
                   <span className="text-xs text-muted-foreground">

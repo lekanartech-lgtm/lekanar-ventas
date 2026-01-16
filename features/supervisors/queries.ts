@@ -19,7 +19,9 @@ function mapRowToTeamMember(row: TeamMemberRow): TeamMember {
   }
 }
 
-export async function getTeamMembersBySupervisor(supervisorId: string): Promise<TeamMember[]> {
+export async function getTeamMembersBySupervisor(
+  supervisorId: string,
+): Promise<TeamMember[]> {
   const result = await pool.query<TeamMemberRow>(
     `SELECT u.id, u.name, u.email, u.agency_id, a.name as agency_name
      FROM "user" u
@@ -27,15 +29,17 @@ export async function getTeamMembersBySupervisor(supervisorId: string): Promise<
      JOIN supervisor_advisors sa ON sa.advisor_id = u.id
      WHERE sa.supervisor_id = $1
      ORDER BY a.name NULLS LAST, u.name`,
-    [supervisorId]
+    [supervisorId],
   )
   return result.rows.map(mapRowToTeamMember)
 }
 
-export async function getTeamStatsBySupervisor(supervisorId: string): Promise<TeamStats> {
+export async function getTeamStatsBySupervisor(
+  supervisorId: string,
+): Promise<TeamStats> {
   const membersResult = await pool.query<{ count: string }>(
     `SELECT COUNT(*) as count FROM supervisor_advisors WHERE supervisor_id = $1`,
-    [supervisorId]
+    [supervisorId],
   )
 
   const leadsResult = await pool.query<{ count: string }>(
@@ -43,7 +47,7 @@ export async function getTeamStatsBySupervisor(supervisorId: string): Promise<Te
      FROM leads l
      JOIN supervisor_advisors sa ON l.user_id = sa.advisor_id
      WHERE sa.supervisor_id = $1`,
-    [supervisorId]
+    [supervisorId],
   )
 
   const salesResult = await pool.query<{ count: string }>(
@@ -51,7 +55,7 @@ export async function getTeamStatsBySupervisor(supervisorId: string): Promise<Te
      FROM sales s
      JOIN supervisor_advisors sa ON s.user_id = sa.advisor_id
      WHERE sa.supervisor_id = $1`,
-    [supervisorId]
+    [supervisorId],
   )
 
   const newLeadsTodayResult = await pool.query<{ count: string }>(
@@ -60,7 +64,7 @@ export async function getTeamStatsBySupervisor(supervisorId: string): Promise<Te
      JOIN supervisor_advisors sa ON l.user_id = sa.advisor_id
      WHERE sa.supervisor_id = $1
      AND l.created_at::date = CURRENT_DATE`,
-    [supervisorId]
+    [supervisorId],
   )
 
   const salesThisMonthResult = await pool.query<{ count: string }>(
@@ -69,7 +73,7 @@ export async function getTeamStatsBySupervisor(supervisorId: string): Promise<Te
      JOIN supervisor_advisors sa ON s.user_id = sa.advisor_id
      WHERE sa.supervisor_id = $1
      AND s.created_at >= date_trunc('month', CURRENT_DATE)`,
-    [supervisorId]
+    [supervisorId],
   )
 
   return {
@@ -81,7 +85,9 @@ export async function getTeamStatsBySupervisor(supervisorId: string): Promise<Te
   }
 }
 
-export async function getAdvisorsNotAssignedToSupervisor(supervisorId: string): Promise<TeamMember[]> {
+export async function getAdvisorsNotAssignedToSupervisor(
+  supervisorId: string,
+): Promise<TeamMember[]> {
   const result = await pool.query<TeamMemberRow>(
     `SELECT u.id, u.name, u.email, u.agency_id, a.name as agency_name
      FROM "user" u
@@ -91,7 +97,7 @@ export async function getAdvisorsNotAssignedToSupervisor(supervisorId: string): 
        SELECT advisor_id FROM supervisor_advisors WHERE supervisor_id = $1
      )
      ORDER BY a.name NULLS LAST, u.name`,
-    [supervisorId]
+    [supervisorId],
   )
   return result.rows.map(mapRowToTeamMember)
 }

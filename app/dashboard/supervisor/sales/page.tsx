@@ -3,7 +3,11 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { auth } from '@/features/auth/server'
-import { getSalesBySupervisor, SalesTable, SalesCardList } from '@/features/sales'
+import {
+  getSalesBySupervisor,
+  SalesTable,
+  SalesCardList,
+} from '@/features/sales'
 import { Button } from '@/components/ui/button'
 
 export default async function SupervisorSalesPage() {

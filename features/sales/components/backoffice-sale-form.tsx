@@ -31,7 +31,7 @@ export function BackofficeSaleForm({ sale }: { sale: BackofficeSale }) {
 
   async function handleSubmit(
     _prevState: FormState,
-    formData: FormData
+    formData: FormData,
   ): Promise<FormState> {
     const data: BackofficeUpdateData = {}
 
@@ -92,7 +92,9 @@ export function BackofficeSaleForm({ sale }: { sale: BackofficeSale }) {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-base">Datos de validación (Backoffice)</CardTitle>
+        <CardTitle className="text-base">
+          Datos de validación (Backoffice)
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <form action={formAction} className="space-y-4">
@@ -118,7 +120,9 @@ export function BackofficeSaleForm({ sale }: { sale: BackofficeSale }) {
                 type="date"
                 defaultValue={
                   sale.installationDate
-                    ? new Date(sale.installationDate).toISOString().split('T')[0]
+                    ? new Date(sale.installationDate)
+                        .toISOString()
+                        .split('T')[0]
                     : ''
                 }
               />
@@ -155,13 +159,16 @@ export function BackofficeSaleForm({ sale }: { sale: BackofficeSale }) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {(Object.entries(REQUEST_STATUS_CONFIG) as [RequestStatus, { label: string }][]).map(
-                    ([value, config]) => (
-                      <SelectItem key={value} value={value}>
-                        {config.label}
-                      </SelectItem>
-                    )
-                  )}
+                  {(
+                    Object.entries(REQUEST_STATUS_CONFIG) as [
+                      RequestStatus,
+                      { label: string },
+                    ][]
+                  ).map(([value, config]) => (
+                    <SelectItem key={value} value={value}>
+                      {config.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -173,13 +180,16 @@ export function BackofficeSaleForm({ sale }: { sale: BackofficeSale }) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {(Object.entries(ORDER_STATUS_CONFIG) as [OrderStatus, { label: string }][]).map(
-                    ([value, config]) => (
-                      <SelectItem key={value} value={value}>
-                        {config.label}
-                      </SelectItem>
-                    )
-                  )}
+                  {(
+                    Object.entries(ORDER_STATUS_CONFIG) as [
+                      OrderStatus,
+                      { label: string },
+                    ][]
+                  ).map(([value, config]) => (
+                    <SelectItem key={value} value={value}>
+                      {config.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -201,7 +211,9 @@ export function BackofficeSaleForm({ sale }: { sale: BackofficeSale }) {
           )}
 
           {state.success && (
-            <p className="text-sm text-green-600">Cambios guardados correctamente</p>
+            <p className="text-sm text-green-600">
+              Cambios guardados correctamente
+            </p>
           )}
 
           <Button type="submit" disabled={isPending} className="w-full">

@@ -76,12 +76,15 @@ export async function getLeadsByUserId(userId: string): Promise<Lead[]> {
     LEFT JOIN states s ON c.state_id = s.id
     WHERE l.user_id = $1
     ORDER BY l.created_at DESC`,
-    [userId]
+    [userId],
   )
   return result.rows.map(mapRowToLead)
 }
 
-export async function getLeadById(id: string, userId: string): Promise<Lead | null> {
+export async function getLeadById(
+  id: string,
+  userId: string,
+): Promise<Lead | null> {
   const result = await pool.query<LeadRow>(
     `SELECT
       l.*,
@@ -97,12 +100,14 @@ export async function getLeadById(id: string, userId: string): Promise<Lead | nu
     LEFT JOIN cities c ON d.city_id = c.id
     LEFT JOIN states s ON c.state_id = s.id
     WHERE l.id = $1 AND l.user_id = $2`,
-    [id, userId]
+    [id, userId],
   )
   return result.rows[0] ? mapRowToLead(result.rows[0]) : null
 }
 
-export async function getLeadByIdForAdmin(id: string): Promise<(Lead & { userName?: string }) | null> {
+export async function getLeadByIdForAdmin(
+  id: string,
+): Promise<(Lead & { userName?: string }) | null> {
   const result = await pool.query<LeadRow & { user_name: string }>(
     `SELECT
       l.*,
@@ -120,7 +125,7 @@ export async function getLeadByIdForAdmin(id: string): Promise<(Lead & { userNam
     LEFT JOIN cities c ON d.city_id = c.id
     LEFT JOIN states s ON c.state_id = s.id
     WHERE l.id = $1`,
-    [id]
+    [id],
   )
   if (!result.rows[0]) return null
   return {
@@ -129,7 +134,9 @@ export async function getLeadByIdForAdmin(id: string): Promise<(Lead & { userNam
   }
 }
 
-export async function getLeadsBySupervisor(supervisorId: string): Promise<Lead[]> {
+export async function getLeadsBySupervisor(
+  supervisorId: string,
+): Promise<Lead[]> {
   const result = await pool.query<LeadRow>(
     `SELECT
       l.*,
@@ -147,7 +154,7 @@ export async function getLeadsBySupervisor(supervisorId: string): Promise<Lead[]
     JOIN supervisor_advisors sa ON l.user_id = sa.advisor_id
     WHERE sa.supervisor_id = $1
     ORDER BY l.created_at DESC`,
-    [supervisorId]
+    [supervisorId],
   )
   return result.rows.map(mapRowToLead)
 }
@@ -169,7 +176,7 @@ export async function getAllLeads(): Promise<Lead[]> {
     LEFT JOIN districts d ON l.district_id = d.id
     LEFT JOIN cities c ON d.city_id = c.id
     LEFT JOIN states s ON c.state_id = s.id
-    ORDER BY l.created_at DESC`
+    ORDER BY l.created_at DESC`,
   )
   return result.rows.map((row) => ({
     ...mapRowToLead(row),
@@ -178,8 +185,12 @@ export async function getAllLeads(): Promise<Lead[]> {
 }
 
 export async function getReferralSources(): Promise<ReferralSource[]> {
-  const result = await pool.query<{ id: string; name: string; is_active: boolean }>(
-    `SELECT id, name, is_active FROM referral_sources WHERE is_active = true ORDER BY name`
+  const result = await pool.query<{
+    id: string
+    name: string
+    is_active: boolean
+  }>(
+    `SELECT id, name, is_active FROM referral_sources WHERE is_active = true ORDER BY name`,
   )
   return result.rows.map((row) => ({
     id: row.id,
@@ -200,7 +211,7 @@ export async function getStates(countryId: string = 'PE'): Promise<State[]> {
      FROM states
      WHERE country_id = $1 AND is_active = true
      ORDER BY name`,
-    [countryId]
+    [countryId],
   )
   return result.rows.map((row) => ({
     id: row.id,
@@ -221,7 +232,7 @@ export async function getCitiesByState(stateId: string): Promise<City[]> {
      FROM cities
      WHERE state_id = $1 AND is_active = true
      ORDER BY name`,
-    [stateId]
+    [stateId],
   )
   return result.rows.map((row) => ({
     id: row.id,
@@ -243,7 +254,7 @@ export async function getDistrictsByCity(cityId: string): Promise<District[]> {
      FROM districts
      WHERE city_id = $1 AND is_active = true
      ORDER BY name`,
-    [cityId]
+    [cityId],
   )
   return result.rows.map((row) => ({
     id: row.id,

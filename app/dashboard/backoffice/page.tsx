@@ -89,7 +89,9 @@ export default async function BackofficeDashboardPage() {
       {/* Ventas pendientes recientes */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Ventas pendientes de validar</CardTitle>
+          <CardTitle className="text-base">
+            Ventas pendientes de validar
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {pendingSales.length === 0 ? (

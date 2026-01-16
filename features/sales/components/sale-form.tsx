@@ -34,10 +34,10 @@ export function SaleForm({ sale, lead, plans, operators }: SaleFormProps) {
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
   const [isPhoneOwner, setIsPhoneOwner] = useState(
-    sale ? !sale.phoneOwnerName : true
+    sale ? !sale.phoneOwnerName : true,
   )
   const [selectedOperatorId, setSelectedOperatorId] = useState(
-    sale?.operatorId || lead?.operatorId || ''
+    sale?.operatorId || lead?.operatorId || '',
   )
   const [selectedPlanId, setSelectedPlanId] = useState(sale?.planId || '')
   const [price, setPrice] = useState(sale?.price?.toString() || '')
@@ -72,7 +72,7 @@ export function SaleForm({ sale, lead, plans, operators }: SaleFormProps) {
       (position) => {
         const latInput = document.getElementById('latitude') as HTMLInputElement
         const lngInput = document.getElementById(
-          'longitude'
+          'longitude',
         ) as HTMLInputElement
         if (latInput && lngInput) {
           latInput.value = position.coords.latitude.toFixed(8)
@@ -81,7 +81,7 @@ export function SaleForm({ sale, lead, plans, operators }: SaleFormProps) {
       },
       (error) => {
         alert('No se pudo obtener la ubicación: ' + error.message)
-      }
+      },
     )
   }
 

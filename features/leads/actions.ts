@@ -18,7 +18,7 @@ export async function fetchCitiesByState(stateId: string): Promise<City[]> {
      FROM cities
      WHERE state_id = $1 AND is_active = true
      ORDER BY name`,
-    [stateId]
+    [stateId],
   )
   return result.rows.map((row) => ({
     id: row.id,
@@ -28,7 +28,9 @@ export async function fetchCitiesByState(stateId: string): Promise<City[]> {
   }))
 }
 
-export async function fetchDistrictsByCity(cityId: string): Promise<District[]> {
+export async function fetchDistrictsByCity(
+  cityId: string,
+): Promise<District[]> {
   const result = await pool.query<{
     id: string
     city_id: string
@@ -40,7 +42,7 @@ export async function fetchDistrictsByCity(cityId: string): Promise<District[]> 
      FROM districts
      WHERE city_id = $1 AND is_active = true
      ORDER BY name`,
-    [cityId]
+    [cityId],
   )
   return result.rows.map((row) => ({
     id: row.id,
@@ -82,7 +84,7 @@ export async function createLead(data: LeadFormData) {
         data.latitude ? parseFloat(data.latitude) : null,
         data.longitude ? parseFloat(data.longitude) : null,
         data.reference || null,
-      ]
+      ],
     )
 
     revalidatePath('/dashboard/leads')
@@ -103,7 +105,7 @@ export async function updateLead(id: string, data: Partial<LeadFormData>) {
   try {
     const existing = await pool.query(
       'SELECT user_id FROM leads WHERE id = $1',
-      [id]
+      [id],
     )
 
     if (existing.rows.length === 0) {
@@ -183,7 +185,7 @@ export async function updateLead(id: string, data: Partial<LeadFormData>) {
 
     await pool.query(
       `UPDATE leads SET ${fields.join(', ')} WHERE id = $${paramIndex}`,
-      values
+      values,
     )
 
     revalidatePath('/dashboard/leads')
@@ -205,7 +207,7 @@ export async function deleteLead(id: string) {
   try {
     const existing = await pool.query(
       'SELECT user_id FROM leads WHERE id = $1',
-      [id]
+      [id],
     )
 
     if (existing.rows.length === 0) {
@@ -234,10 +236,9 @@ export async function adminUpdateLead(id: string, data: Partial<LeadFormData>) {
   }
 
   try {
-    const existing = await pool.query(
-      'SELECT id FROM leads WHERE id = $1',
-      [id]
-    )
+    const existing = await pool.query('SELECT id FROM leads WHERE id = $1', [
+      id,
+    ])
 
     if (existing.rows.length === 0) {
       return { error: 'Lead no encontrado' }
@@ -312,7 +313,7 @@ export async function adminUpdateLead(id: string, data: Partial<LeadFormData>) {
 
     await pool.query(
       `UPDATE leads SET ${fields.join(', ')}, updated_at = NOW() WHERE id = $${paramIndex}`,
-      values
+      values,
     )
 
     revalidatePath('/admin/leads')

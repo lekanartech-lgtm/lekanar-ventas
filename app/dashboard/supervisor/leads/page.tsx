@@ -3,7 +3,11 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { auth } from '@/features/auth/server'
-import { getLeadsBySupervisor, LeadsTable, LeadsCardList } from '@/features/leads'
+import {
+  getLeadsBySupervisor,
+  LeadsTable,
+  LeadsCardList,
+} from '@/features/leads'
 import { Button } from '@/components/ui/button'
 
 export default async function SupervisorLeadsPage() {

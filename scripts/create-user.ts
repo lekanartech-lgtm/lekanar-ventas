@@ -22,7 +22,7 @@ Example:
 
   if (!VALID_ROLES.includes(role as (typeof VALID_ROLES)[number])) {
     console.error(
-      `Invalid role: ${role}. Valid roles: ${VALID_ROLES.join(', ')}`
+      `Invalid role: ${role}. Valid roles: ${VALID_ROLES.join(', ')}`,
     )
     process.exit(1)
   }
