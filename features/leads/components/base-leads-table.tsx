@@ -68,6 +68,8 @@ export function BaseLeadsTable<T extends BaseLead>({
     },
   })
 
+  console.log(leads[0].userId)
+
   return (
     <Card>
       <CardHeader className="pb-4">

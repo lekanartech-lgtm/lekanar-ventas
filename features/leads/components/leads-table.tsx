@@ -46,12 +46,6 @@ function LeadActions({ lead }: { lead: Lead }) {
             </Link>
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem asChild>
-          <Link href={`/dashboard/leads/${lead.id}/edit`}>
-            <Pencil className="mr-2 h-4 w-4" />
-            Editar
-          </Link>
-        </DropdownMenuItem>
         <DropdownMenuItem className="text-destructive">
           <Trash2 className="mr-2 h-4 w-4" />
           Eliminar
@@ -82,7 +76,6 @@ export function LeadsTable({ leads }: { leads: Lead[] }) {
   )
 }
 
-// Mobile-friendly card list for small screens
 export function LeadsCardList({ leads }: { leads: Lead[] }) {
   if (leads.length === 0) {
     return (

@@ -3,6 +3,7 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { ArrowUpDown, Phone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 import { LeadStatusBadge } from './lead-status-badge'
 import { OPERATORS } from '../constants'
 import type { Lead } from '../types'
@@ -36,12 +37,14 @@ export function createClientColumn<T extends BaseLead>(): ColumnDef<T> {
     cell: ({ row }) => {
       const lead = row.original
       return (
-        <div>
-          <div className="font-medium">{lead.fullName}</div>
-          {lead.dni && (
-            <div className="text-sm text-muted-foreground">DNI: {lead.dni}</div>
-          )}
-        </div>
+        <Link href={`/dashboard/leads/${lead.id}/edit`}>
+          <div>
+            <div className="font-medium">{lead.fullName}</div>
+            {lead.dni && (
+              <p className="text-sm text-muted-foreground">DNI: {lead.dni}</p>
+            )}
+          </div>
+        </Link>
       )
     },
   }
